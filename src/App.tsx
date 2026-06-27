@@ -1,4 +1,12 @@
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import {
   Aperture,
   ArrowDown,
@@ -18,7 +26,7 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
-import { useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
 
 // ---------------------------------------------------------------------------
 // Брендовая палитра: глубокий изумруд + золото + мятный акцент. Без бежевого.
@@ -85,9 +93,9 @@ const FACETS = [
 ];
 
 const TRACKS_LIVE = [
-  { title: "Спираль судьбы", src: "/audio/track-1.mp3" },
   { title: "Мирный воин", src: "/audio/track-2.mp3" },
   { title: "Инкогнито Бог", src: "/audio/track-3.mp3" },
+  { title: "Спираль судьбы", src: "/audio/track-1.mp3" },
 ];
 
 const LYRICS: Record<string, string> = {
@@ -281,15 +289,210 @@ const fadeUp = {
   transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
 };
 
+// ============================================================================
+// Визуальные эффекты
+// ============================================================================
+
+// Мерцающие искры — слой за контентом
+function SparkleField({ count = 26 }: { count?: number }) {
+  const dots = useMemo(
+    () =>
+      Array.from({ length: count }).map(() => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        size: Math.random() * 2.4 + 1,
+        delay: Math.random() * 4,
+        dur: Math.random() * 3 + 2.5,
+        mint: Math.random() < 0.34,
+      })),
+    [count],
+  );
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {dots.map((d, i) => (
+        <span
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            left: `${d.left}%`,
+            top: `${d.top}%`,
+            width: d.size,
+            height: d.size,
+            backgroundColor: d.mint ? C.mint : C.goldSoft,
+            boxShadow: `0 0 ${d.size * 3}px ${d.mint ? C.mint : C.gold}`,
+            animation: `twinkle ${d.dur}s ease-in-out ${d.delay}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Tracing beam — золотой луч-«позвоночник» слева, заполняется по скроллу (десктоп)
+function TracingBeam() {
+  const { scrollYProgress } = useScroll();
+  const scaleY = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed left-4 top-0 z-40 hidden h-screen w-[2px] lg:block"
+      style={{ backgroundColor: "rgba(201,168,76,0.12)" }}
+    >
+      <motion.div
+        className="absolute inset-0 origin-top"
+        style={{ scaleY, background: `linear-gradient(${C.mint}, ${C.gold})`, boxShadow: `0 0 10px ${C.gold}` }}
+      />
+    </div>
+  );
+}
+
+// Текст «проявляется» по словам (Text generate)
+function WordReveal({
+  text,
+  className,
+  style,
+  delay = 0,
+}: {
+  text: string;
+  className?: string;
+  style?: CSSProperties;
+  delay?: number;
+}) {
+  const words = text.split(" ");
+  return (
+    <span className={className} style={style}>
+      {words.map((w, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, filter: "blur(8px)", y: 6 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+          transition={{ delay: delay + i * 0.07, duration: 0.5, ease: "easeOut" }}
+          className="inline-block"
+        >
+          {w}&nbsp;
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
+// Хук 3D-наклона по положению курсора
+function useTilt(max = 9) {
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const rotateX = useSpring(rx, { stiffness: 200, damping: 18 });
+  const rotateY = useSpring(ry, { stiffness: 200, damping: 18 });
+  const onMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    ry.set(px * max);
+    rx.set(-py * max);
+  };
+  const onMouseLeave = () => {
+    rx.set(0);
+    ry.set(0);
+  };
+  return { rotateX, rotateY, onMouseMove, onMouseLeave };
+}
+
+// Бейдж-грань с 3D-наклоном и якорной ссылкой
+function FacetBadge({
+  f,
+  i,
+  wide,
+  mouseX,
+}: {
+  f: (typeof FACETS)[number];
+  i: number;
+  wide?: boolean;
+  mouseX: ReturnType<typeof useMotionValue<number>>;
+}) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  // Расстояние от курсора до центра карточки (proximity-док)
+  const distance = useTransform(mouseX, (val) => {
+    const b = ref.current?.getBoundingClientRect();
+    if (!b) return 10000;
+    return val - (b.left + b.width / 2);
+  });
+  const scaleSync = useTransform(distance, [-170, 0, 170], [1, 1.26, 1]);
+  const scale = useSpring(scaleSync, { stiffness: 260, damping: 20, mass: 0.4 });
+
+  return (
+    <motion.a
+      ref={ref}
+      href={f.href}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 + i * 0.08, duration: 0.5 }}
+      whileHover={{ backgroundColor: C.cardHi, borderColor: C.gold }}
+      style={{ scale, transformOrigin: "center bottom", borderColor: C.line, backgroundColor: C.card }}
+      className={`flex cursor-pointer flex-col items-center gap-2.5 rounded-2xl border px-3 py-4 text-center ${
+        wide ? "col-span-2 sm:col-span-1" : ""
+      }`}
+    >
+      <f.icon className="h-6 w-6" style={{ color: C.gold }} />
+      <span className="hyphens-auto break-words text-[10px] font-semibold uppercase leading-tight tracking-[0.04em]" style={{ color: C.ink }}>
+        {f.label}
+      </span>
+    </motion.a>
+  );
+}
+
+// Карточка проекта с 3D-наклоном
+function ProjectCard({ p }: { p: (typeof PROJECTS)[number] }) {
+  const tilt = useTilt(8);
+  return (
+    <motion.a
+      href={p.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={tilt.onMouseLeave}
+      whileHover={{ borderColor: C.gold }}
+      style={{ borderColor: C.line, backgroundColor: C.cardHi, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformPerspective: 600 }}
+      className="flex flex-col justify-between gap-3 rounded-2xl border p-5"
+    >
+      <span className="text-[15px]" style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: C.ink }}>
+        {p.title}
+      </span>
+      <span className="text-[13px] leading-snug" style={{ color: C.inkSoft }}>
+        {p.desc}
+      </span>
+      <ExternalLink className="h-5 w-5" style={{ color: C.gold }} />
+    </motion.a>
+  );
+}
+
 // ---------------------------------------------------------------------------
 
+// При старте любого аудио/видео ставим на паузу все остальные — чтобы два
+// трека (и аудио, и видео) не звучали одновременно. Событие `play` не всплывает,
+// поэтому слушаем его на document в фазе перехвата (capture).
+function useExclusiveMediaPlayback() {
+  useEffect(() => {
+    const onPlay = (e: Event) => {
+      const target = e.target;
+      if (!(target instanceof HTMLMediaElement)) return;
+      document.querySelectorAll<HTMLMediaElement>("audio, video").forEach((el) => {
+        if (el !== target && !el.paused) el.pause();
+      });
+    };
+    document.addEventListener("play", onPlay, true);
+    return () => document.removeEventListener("play", onPlay, true);
+  }, []);
+}
+
 export default function App() {
+  useExclusiveMediaPlayback();
+
   return (
     <main
       style={{ fontFamily: "var(--font-body)", backgroundColor: C.bg, color: C.ink }}
       className="relative w-full overflow-x-hidden"
     >
       <ScrollProgress />
+      <TracingBeam />
       <Hero />
       <TwoWords />
       <Engineer />
@@ -437,14 +640,17 @@ function PhotoFrame({
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [parallax, -parallax]);
+  const tilt = useTilt(7);
 
   return (
     <motion.div
       ref={ref}
-      whileHover={{ y: -6, rotate: 0 }}
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={tilt.onMouseLeave}
+      whileHover={{ y: -6 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={`relative ${aspect} w-full overflow-hidden rounded-[28px] border shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]`}
-      style={{ backgroundColor: C.bg2, borderColor: C.line, transform: `rotate(${rotate}deg)` }}
+      style={{ backgroundColor: C.bg2, borderColor: C.line, rotate, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformPerspective: 800 }}
     >
       <div
         className="absolute inset-0 flex items-center justify-center text-center text-xs"
@@ -470,11 +676,25 @@ function PhotoFrame({
 function Hero() {
   const { scrollY } = useScroll();
   const yName = useTransform(scrollY, [0, 400], [0, -40]);
+  const mx = useMotionValue(-1000);
+  const my = useMotionValue(-1000);
+  const spotlight = useMotionTemplate`radial-gradient(480px circle at ${mx}px ${my}px, rgba(201,168,76,0.16), transparent 62%)`;
+  const dockMouseX = useMotionValue(Infinity);
 
   return (
-    <section style={{ backgroundColor: C.bg }} className="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28">
+    <section
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        mx.set(e.clientX - r.left);
+        my.set(e.clientY - r.top);
+      }}
+      style={{ backgroundColor: C.bg }}
+      className="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28"
+    >
       <Glow className="left-[-10%] top-[-10%] h-[520px] w-[520px]" />
       <Glow className="right-[-12%] bottom-[-15%] h-[460px] w-[460px]" />
+      <SparkleField count={30} />
+      <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: spotlight }} />
       <Container>
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <motion.div style={{ y: yName }}>
@@ -501,34 +721,21 @@ function Hero() {
                 Бормотов
               </span>
             </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.7 }}
+            <p
               className="mt-7 max-w-xl text-xl leading-snug sm:text-2xl"
               style={{ color: C.ink, fontFamily: "var(--font-display)", fontWeight: 500 }}
             >
-              Сочетаю технический подход к творчеству и&nbsp;творческий — к&nbsp;технике.
-            </motion.p>
+              <WordReveal text="Сочетаю технический подход к творчеству и творческий — к технике." delay={0.35} />
+            </p>
 
             {/* Грани — новые карточки-плитки с иконками */}
-            <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div
+              onMouseMove={(e) => dockMouseX.set(e.clientX)}
+              onMouseLeave={() => dockMouseX.set(Infinity)}
+              className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+            >
               {FACETS.map((f, i) => (
-                <motion.a
-                  key={f.label}
-                  href={f.href}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.08, duration: 0.5 }}
-                  whileHover={{ y: -5, backgroundColor: C.cardHi, borderColor: C.gold }}
-                  className="flex cursor-pointer flex-col items-center gap-2.5 rounded-2xl border px-3 py-4 text-center"
-                  style={{ borderColor: C.line, backgroundColor: C.card }}
-                >
-                  <f.icon className="h-6 w-6" style={{ color: C.gold }} />
-                  <span className="hyphens-auto break-words text-[10px] font-semibold uppercase leading-tight tracking-[0.04em]" style={{ color: C.ink }}>
-                    {f.label}
-                  </span>
-                </motion.a>
+                <FacetBadge key={f.label} f={f} i={i} wide={i === FACETS.length - 1} mouseX={dockMouseX} />
               ))}
             </div>
 
@@ -660,22 +867,7 @@ function Engineer() {
             <SectionLabel>Можно посмотреть</SectionLabel>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {PROJECTS.map((p) => (
-                <a
-                  key={p.title}
-                  href={p.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col justify-between gap-3 rounded-2xl border p-5 transition-colors"
-                  style={{ borderColor: C.line, backgroundColor: C.cardHi }}
-                >
-                  <span className="text-[15px]" style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: C.ink }}>
-                    {p.title}
-                  </span>
-                  <span className="text-[13px] leading-snug" style={{ color: C.inkSoft }}>
-                    {p.desc}
-                  </span>
-                  <ExternalLink className="h-5 w-5" style={{ color: C.gold }} />
-                </a>
+                <ProjectCard key={p.title} p={p} />
               ))}
             </div>
           </div>
