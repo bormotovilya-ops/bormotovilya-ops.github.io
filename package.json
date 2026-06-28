@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fancyapps/ui": "^5.0.36",
     "@fontsource/manrope": "^5.2.8",
     "@fontsource/sora": "^5.2.8",
     "framer-motion": "^12.41.0",

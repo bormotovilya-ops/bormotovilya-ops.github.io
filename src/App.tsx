@@ -17,6 +17,7 @@ import {
   Dices,
   ExternalLink,
   Mail,
+  Maximize2,
   Medal,
   MessageCircle,
   Mic,
@@ -27,6 +28,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
+import { Fancybox } from "@fancyapps/ui";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 // ---------------------------------------------------------------------------
 // Брендовая палитра: глубокий изумруд + золото + мятный акцент. Без бежевого.
@@ -63,25 +66,31 @@ const PROJECTS = [
 ];
 
 // Авторы на тему самопознания и развития (то, что вспомнилось; список неполный).
+// note — личный комментарий: что именно у автора читал Илья.
 const AUTHORS = [
-  "Вадим Зеланд",
-  "Джон Кехо",
-  "Хосе Сильва",
-  "Карлос Кастанеда",
-  "Пауло Коэльо",
-  "Конкордия Антарова",
-  "Валерий Синельников",
-  "Дмитрий Верищагин",
-  "Экхарт Толле",
-  "Дэн Миллмэн",
-  "Лоран Гунель",
-  "Робин Шарма",
-  "Вишен Лакьяни",
-  "Энтони Роббинс",
-  "Ричард Бах",
-  "Ошо",
-  "Бодо Шефер",
-  "Наполеон Хилл",
+  { name: "Вадим Зеланд", note: "«Трансерфинг реальности» перевернул мой взгляд на то, как намерение лепит события. Настолько лёг на душу, что стал моей песней «Трансерфинг»." },
+  { name: "Дэн Миллмэн", note: "«Путь мирного воина» — про победы над самим собой. Из него родилась моя песня «Мирный воин». Прочитал и вторую — «Путешествие Сократа», про юные годы его наставника Сократеса." },
+  { name: "Лоран Гунель", note: "«Бог всегда путешествует инкогнито» отозвался так, что превратился в песню «Инкогнито Бог»." },
+  { name: "Стивен Кови", note: "«7 навыков высокоэффективных людей» — очень хорошая и системная книга про приоритеты, проактивность и привычки. Одна из самых структурных в этом списке." },
+  { name: "Джон Кехо", note: "«Подсознание может всё!» — с него у меня началась практика работы с мыслью и визуализацией." },
+  { name: "Хосе Сильва", note: "«Управление разумом по методу Сильва» — первые осознанные опыты с состояниями и самонастройкой." },
+  { name: "Карлос Кастанеда", note: "«Учение дона Хуана» и дальше по серии — про точку сборки и охоту за силой. Читал залпом." },
+  { name: "Пауло Коэльо", note: "«Алхимик» — про Свою Стезю и язык знаков. Та книга, к которой возвращаешься в разные годы по-разному." },
+  { name: "Конкордия Антарова", note: "«Две жизни» — медленное, глубокое чтение про путь ученика. Из тех, что меняют тон внутреннего голоса." },
+  { name: "Валерий Синельников", note: "«Возлюби болезнь свою» — про то, как тело говорит с нами симптомами. Многое про себя понял." },
+  { name: "Дмитрий Верищагин", note: "Система ДЭИР — «Освобождение» и дальше. Прикладная работа с энергетикой и намерением." },
+  { name: "Экхарт Толле", note: "«Сила момента сейчас» и «Новая земля» — про жизнь здесь и сейчас, а не где-то вдали. Классные вещи; этот мотив у меня и в песнях." },
+  { name: "Робин Шарма", note: "«Монах, который продал свой Феррари» — простая притча, с которой удобно начинать менять привычки." },
+  { name: "Радислав Гандапас", note: "«Камасутра для оратора» — его самая рейтинговая: лёгкий и толковый разбор публичных выступлений." },
+  { name: "Вишен Лакьяни", note: "Книги не читал — проходил его бесплатные тренинги (Mindvalley). Про то, как ставить под сомнение «правила» и жить по своим." },
+  { name: "Энтони Роббинс", note: "Книги не читал — был на его бесплатных тренингах. Мощный заряд про управление состоянием и решениями." },
+  { name: "Павел Кочкин", note: "Книги не читал — проходил его бесплатные тренинги про поиск дела жизни и предназначение." },
+  { name: "Ричард Бах", note: "«Чайка по имени Джонатан Ливингстон» и «Иллюзии» — про свободу и то, что границы чаще в голове." },
+  { name: "Ошо", note: "«Осознанность» и беседы — про наблюдателя внутри. Читал не подряд, а как собеседника под настроение." },
+  { name: "Бодо Шефер", note: "«Путь к финансовой свободе» — здравая база про деньги и дисциплину, без эзотерики." },
+  { name: "Наполеон Хилл", note: "«Думай и богатей» — классика про намерение и упорство. Одна из первых книг этого ряда у меня." },
+  { name: "Дейл Карнеги", note: "«Как завоёвывать друзей и оказывать влияние на людей» — азбука тёплого общения, к которой возвращаешься годами." },
+  { name: "Хэл Элрод", note: "«Магия утра» — про силу утренних ритуалов: как первый час задаёт тон всему дню. Простая практика, которая реально меняет режим." },
 ];
 
 const FACETS = [
@@ -246,16 +255,19 @@ const COVER_VIDEO = { title: "Серебро", artist: "Би-2", src: "/covers/s
 const COVER_AUDIO = [
   { title: "Имя твоё", artist: "Колизей", src: "/covers/imya-tvoe.mp3" },
   { title: "Искушение", artist: "Ария", src: "/covers/iskushenie.mp3" },
-  { title: "Звезда", artist: "", src: "/covers/zvezda.mp3" },
-  { title: "Вдох-выдох", artist: "", src: "/covers/vdoh-vydoh.mp3" },
-  { title: "When You Know", artist: "", src: "/covers/when-you-know.mp3" },
-  { title: "Тайна хозяйки старинных часов", artist: "", src: "/covers/tayna.mp3" },
+  { title: "Звезда", artist: "Витас", src: "/covers/zvezda.mp3" },
+  { title: "Вдох-выдох", artist: "T9", src: "/covers/vdoh-vydoh.mp3" },
+  { title: "When You Know", artist: "Scorpions", src: "/covers/when-you-know.mp3" },
+  { title: "Тайна хозяйки старинных часов", artist: "КиШ", src: "/covers/tayna.mp3" },
 ];
 
 const STARMAKER_URL =
   "https://m.starmakerstudios.com/d/profileinfo?from_sid=13368297548&type=sing&color=FE3A6A&shareTime=1782472027&app_name=sm&userId=10133099161903711&cardKey=Profile&pid=Profire_share_B";
 
 const TRACKS_AI = [
+  { title: "Спираль судьбы", src: "/audio/ai-spiral.mp3" },
+  { title: "Мирный воин", src: "/audio/ai-mirnyi-voin.mp3" },
+  { title: "Инкогнито Бог", src: "/audio/ai-incognito.mp3" },
   { title: "Трансерфинг", src: "/audio/ai-1.mp3" },
   { title: "Гений продаж", src: "/audio/ai-3.mp3" },
   { title: "Окружение", src: "/audio/ai-4.mp3" },
@@ -275,12 +287,144 @@ const CONTACTS = [
   { icon: Mail, label: "E-mail", href: "mailto:bormotovilya@gmail.com" },
 ];
 
-const RIDDLE = {
-  question:
-    "Пара нашла на пляже труп под зонтом — с ножом на спине. Ни следов борьбы, ни крови. Вскрытие показало: смерть естественная. Как так?",
-  answer:
-    "У мужчины была татуировка ножа на спине. Он умер от сердечного приступа.",
+// Игра «Телепатия» в формате чата с Ильёй. В каждом раунде 3 факта, один — ложь.
+// Игрок выбирает, какой факт считает ложным. lie — индекс ложного утверждения.
+// У каждого факта свой comment — личная реакция Ильи при выборе именно его.
+type QuizStatement = { text: string; comment: string; video?: string; image?: string };
+type QuizRound = {
+  intro: string;
+  statements: [QuizStatement, QuizStatement, QuizStatement];
+  lie: 0 | 1 | 2;
 };
+
+const QUIZ: QuizRound[] = [
+  {
+    intro: "Сыграем? Будет 5 раундов. В каждом — три факта обо мне: два правдивых и один выдуманный. Твоя задача — почувствовать, где я соврал. Поехали, вот первый:",
+    statements: [
+      {
+        text: "Меня зовут Илья Бормотов",
+        comment:
+          "Не угадал — Бормотов это правда, моя настоящая фамилия. Кстати, наш род в семейном дереве прослеживается аж до 1820-х 🌳",
+      },
+      {
+        text: "Мне 45 лет",
+        comment: "Верно! Мне не 45 — я родился в 1986 году. Точный возраст оставлю посчитать тебе 😉",
+      },
+      {
+        text: "Я живу в городе Сочи",
+        comment: "Мимо — в Сочи я и правда живу. Переехал сюда из Перми, поближе к морю и горам 🌊",
+      },
+    ],
+    lie: 1,
+  },
+  {
+    intro: "А чем я живу? Тут тоже одна подмена.",
+    statements: [
+      {
+        text: "Я занимаюсь разработкой информационных систем",
+        comment: "Не угадал — это чистая правда. В IT я больше 20 лет, занимаюсь автоматизацией и системами.",
+      },
+      {
+        text: "Я увлекаюсь программами саморазвития",
+        comment: "Мимо — саморазвитие это прямо моё, я даже вёл блог «Познай себя». Попробуй ещё раз 🙂",
+      },
+      {
+        text: "Я профессиональный спортсмен",
+        comment:
+          "Верно. Профессионалом я не стал — путь в большой спорт закрыла травма в 13 лет. Но любитель я страстный 😅",
+        image: "/telepathy/sport.jpg",
+      },
+    ],
+    lie: 2,
+  },
+  {
+    intro: "Теперь про тело и таланты. Что из этого я выдумал?",
+    statements: [
+      {
+        text: "Мой рекорд в подтягивании — 40 раз",
+        comment: "Не-а, это правда — личный рекорд 40 раз 💪",
+      },
+      {
+        text: "Умею делать сальто",
+        comment: "Мимо — сальто умею, спасибо трём годам спортивной акробатики в детстве. Вот доказательство:",
+        video: "/telepathy/salto.mp4",
+      },
+      {
+        text: "Владею игрой на музыкальном инструменте",
+        comment:
+          "Правильно! Ни на одном инструменте играть не умею, хоть музыку очень люблю. Надеюсь когда-нибудь это исправить 🎶",
+      },
+    ],
+    lie: 2,
+  },
+  {
+    intro: "Немного историй из жизни. Одна из них — не про меня.",
+    statements: [
+      {
+        text: "В детстве я хотел быть милиционером",
+        comment: "Не угадал — в детстве я и правда мечтал быть милиционером 🚓",
+      },
+      {
+        text: "Отслужил 2 года в армии",
+        comment:
+          "Верно — в армии я не служил, не взяли по здоровью. Зато за «угон» авто меня однажды реально задерживали: я просто перепутал, где оставил машину, объявил её в розыск, а потом нашёл сам в соседнем дворе — радостно сел, и тут меня и поймали 😅",
+      },
+      {
+        text: "Однажды был задержан за угон авто",
+        comment:
+          "Мимо — а ведь это правда! Только я не угонял: перепутал, где оставил свою машину, заявил в розыск, нашёл её сам в соседнем дворе, радостно сел — тут меня и задержали 😅",
+        image: "/telepathy/car.png",
+      },
+    ],
+    lie: 1,
+  },
+  {
+    intro: "И финал — про взгляды и тайны. Последний подвох!",
+    statements: [
+      {
+        text: "Считаю, что любовь живёт 3 года",
+        comment:
+          "Верно! По-моему, у любви целых 7 стадий:\n1) Влюблённость\n2) Насыщение\n3) Отвращение\n4) Терпение\n5) Служение\n6) Дружба\n7) Настоящая любовь\nЗа 3 года обычно доходят до «Отвращения» — и многие сдаются. Но кто идёт дальше, того ждёт настоящее счастье 🙏",
+      },
+      {
+        text: "У меня есть брат-близнец",
+        comment:
+          "Мимо, это был вопрос с подвохом!)) У меня есть двоюродный брат, и мы с ним близнецы… по знаку зодиака 😀 Коварно, прости 🙏",
+      },
+      {
+        text: "Помню 80 знаков после запятой в числе Пи",
+        comment:
+          "Мимо — а это правда! Есть методики запоминания длинных цепочек цифр, я в своё время практиковался ради интереса 👍",
+      },
+    ],
+    lie: 0,
+  },
+];
+
+// Аватарка Ильи для чата (можно заменить на отдельный файл-портрет).
+const ILYA_AVATAR = "/photo.jpg";
+
+// Титул по числу угаданных (индекс = число правильных, 0..5).
+const QUIZ_TITLES: { title: string; tagline: string }[] = [
+  { title: "Случайный прохожий", tagline: "Мы точно знакомы?" },
+  { title: "Случайный прохожий", tagline: "Кажется, нас ещё не представили." },
+  { title: "Знакомый", tagline: "Где-то пересекались — это уже что-то." },
+  { title: "Приятель", tagline: "А ты неплохо меня считываешь." },
+  { title: "Друг", tagline: "Почти в самую точку. Уважаю." },
+  { title: "Роднее некуда", tagline: "Ты читаешь меня как открытую книгу. Телепатия!" },
+];
+
+// Открывается только при 5/5. Награда — секрет, но за ним нужно написать Илье
+// в личные сообщения пароль. Пароль зависит от числа попыток (см. PASSWORD_BASE).
+const QUIZ_SECRET = {
+  title: "Телепатия: 5 из 5! 🔮",
+  intro: "Раз уж ты видишь меня насквозь — у меня есть для тебя секрет. Но просто так не отдам 😉",
+  instruction: "Напиши мне в личные сообщения этот пароль — и я поделюсь секретом:",
+  cta: { label: "Написать Илье", href: "https://t.me/IlyaBorm" },
+};
+
+// Пароль = PASSWORD_BASE + номер попытки: 1-я → 1234, 2-я → 1235, и т.д.
+const PASSWORD_BASE = 1233;
 
 const fadeUp = {
   initial: { opacity: 0, y: 28 },
@@ -326,6 +470,93 @@ function SparkleField({ count = 26 }: { count?: number }) {
       ))}
     </div>
   );
+}
+
+// Sparkles (по мотивам Aceternity) — плотное поле мерцающих частиц на canvas.
+// Без сторонних зависимостей; пауза, когда блок вне экрана.
+function SparklesCore({
+  className = "",
+  color = "#FFFFFF",
+  density = 100,
+  minSize = 0.6,
+  maxSize = 1.6,
+}: {
+  className?: string;
+  color?: string;
+  density?: number;
+  minSize?: number;
+  maxSize?: number;
+}) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let w = 0;
+    let h = 0;
+    let raf = 0;
+    let running = false;
+    const t0 = performance.now();
+    let particles: { x: number; y: number; r: number; a: number; sp: number; ph: number }[] = [];
+
+    const build = () => {
+      const rect = canvas.getBoundingClientRect();
+      w = rect.width;
+      h = rect.height;
+      canvas.width = Math.max(1, Math.floor(w * dpr));
+      canvas.height = Math.max(1, Math.floor(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.min(1600, Math.max(60, Math.round(((w * h) / 170) * (density / 100))));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: minSize + Math.random() * (maxSize - minSize),
+        a: 0.25 + Math.random() * 0.75,
+        sp: 0.6 + Math.random() * 1.8,
+        ph: Math.random() * Math.PI * 2,
+      }));
+    };
+
+    const draw = (now: number) => {
+      const t = (now - t0) / 1000;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = color;
+      for (const p of particles) {
+        ctx.globalAlpha = p.a * (0.45 + 0.55 * Math.sin(p.ph + t * p.sp));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(draw);
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(draw);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    build();
+    const ro = new ResizeObserver(build);
+    ro.observe(canvas);
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0 });
+    io.observe(canvas);
+
+    return () => {
+      stop();
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, [color, density, minSize, maxSize]);
+
+  return <canvas ref={ref} aria-hidden className={className} />;
 }
 
 // Tracing beam — золотой луч-«позвоночник» слева, заполняется по скроллу (десктоп)
@@ -523,9 +754,27 @@ function ScrollProgress() {
 
 function Container({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`mx-auto w-full max-w-[1180px] px-5 sm:px-8 lg:px-12 ${className}`}>
+    <div className={`relative z-10 mx-auto w-full max-w-[1180px] px-5 sm:px-8 lg:px-12 ${className}`}>
       {children}
     </div>
+  );
+}
+
+// Огромная полупрозрачная надпись-«водяной знак» на фоне секции (только десктоп).
+function GhostTitle({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`pointer-events-none absolute z-0 hidden select-none whitespace-nowrap leading-none md:block ${className}`}
+      style={{
+        fontFamily: "var(--font-display)",
+        fontWeight: 300,
+        letterSpacing: "0.04em",
+        color: "rgba(201,168,76,0.07)",
+      }}
+    >
+      {children}
+    </span>
   );
 }
 
@@ -769,6 +1018,7 @@ function Hero() {
 function TwoWords() {
   return (
     <section style={{ backgroundColor: C.bg2 }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-left-4 top-6 text-[10vw]">about</GhostTitle>
       <Glow className="left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2" />
       <Container>
         <motion.div {...fadeUp} className="relative mx-auto max-w-3xl text-center">
@@ -805,6 +1055,7 @@ function TwoCol({
 }) {
   return (
     <section style={{ backgroundColor: bg }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-right-6 top-10 text-[11vw]">family</GhostTitle>
       <Container>
         <motion.div {...fadeUp} className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div className={reverse ? "lg:order-2" : ""}>{children}</div>
@@ -820,6 +1071,7 @@ function TwoCol({
 function Engineer() {
   return (
     <section id="engineer" style={{ backgroundColor: C.bg }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-left-6 top-8 text-[11vw]">code</GhostTitle>
       <Container>
         {/* Ряд 1: текст + фото */}
         <motion.div {...fadeUp} className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
@@ -882,6 +1134,7 @@ function Engineer() {
 function Sport() {
   return (
     <section id="sport" style={{ backgroundColor: C.bg2 }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-right-6 top-10 text-[12vw]">sport</GhostTitle>
       <Container>
         <motion.div {...fadeUp} className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div className="space-y-4">
@@ -973,6 +1226,7 @@ function TrackWithLyrics({ title, src, lyrics }: { title: string; src: string; l
 function Music() {
   return (
     <section id="music" style={{ backgroundColor: C.bg }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-right-6 top-8 text-[11vw]">music</GhostTitle>
       <Glow className="right-[-10%] top-[5%] h-[420px] w-[420px]" />
       <Container>
         <motion.div {...fadeUp} className="grid items-start gap-12 lg:grid-cols-2 lg:gap-20">
@@ -1084,10 +1338,369 @@ function Music() {
 
 // ---------------------------------------------------------------------------
 
+// Пузырь чата. side="left" — реплика Ильи (с аватаркой), "right" — игрок.
+function ChatBubble({
+  side,
+  children,
+  accent,
+}: {
+  side: "left" | "right";
+  children: ReactNode;
+  accent?: string;
+}) {
+  const left = side === "left";
+  return (
+    <div className={`flex items-end gap-2 ${left ? "" : "flex-row-reverse"}`}>
+      {left && (
+        <img
+          src={ILYA_AVATAR}
+          alt="Илья"
+          className="h-8 w-8 shrink-0 rounded-full object-cover"
+          style={{ border: `1px solid ${C.line}` }}
+        />
+      )}
+      <div
+        className="max-w-[85%] rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed"
+        style={
+          left
+            ? { backgroundColor: C.cardHi, color: C.ink, borderTopLeftRadius: 4, border: `1px solid ${accent ?? C.line}` }
+            : { backgroundColor: C.gold, color: C.bg, borderTopRightRadius: 4, fontWeight: 600 }
+        }
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Индикатор «Илья печатает…»
+function TypingDots() {
+  return (
+    <div className="flex items-end gap-2">
+      <img
+        src={ILYA_AVATAR}
+        alt="Илья"
+        className="h-8 w-8 shrink-0 rounded-full object-cover"
+        style={{ border: `1px solid ${C.line}` }}
+      />
+      <div
+        className="rounded-2xl px-4 py-3"
+        style={{ backgroundColor: C.cardHi, border: `1px solid ${C.line}`, borderTopLeftRadius: 4 }}
+      >
+        <div className="flex gap-1">
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="block h-2 w-2 rounded-full"
+              style={{ backgroundColor: C.inkSoft }}
+              animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
+              transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Игра «Телепатия» в формате чата с Ильёй: 5 раундов, в каждом 3 факта и одна ложь.
+// Илья «пишет» вопрос, игрок отвечает, Илья комментирует именно его выбор.
+function GuessTruthQuiz() {
+  const [round, setRound] = useState(0);
+  const [picks, setPicks] = useState<number[]>([]);
+  const [showComment, setShowComment] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+
+  // Число пройденных тестов храним между визитами — от него зависит пароль.
+  useEffect(() => {
+    const saved = Number(localStorage.getItem("telepathy_attempts"));
+    if (Number.isFinite(saved) && saved > 0) setAttempts(saved);
+  }, []);
+
+  const lieColor = "#E2685E";
+  const total = QUIZ.length;
+  const current = QUIZ[round];
+  const revealed = picks.length > round;
+  const score = picks.filter((p, i) => p === QUIZ[i].lie).length;
+  const password = PASSWORD_BASE + attempts;
+
+  // После выбора показываем «печатает…», затем комментарий Ильи.
+  useEffect(() => {
+    if (!revealed) {
+      setShowComment(false);
+      return;
+    }
+    setShowComment(false);
+    const t = setTimeout(() => setShowComment(true), 750);
+    return () => clearTimeout(t);
+  }, [revealed, round]);
+
+  const pick = (idx: number) => {
+    if (!revealed) setPicks((prev) => [...prev, idx]);
+  };
+  const finish = () => {
+    const n = attempts + 1;
+    setAttempts(n);
+    try {
+      localStorage.setItem("telepathy_attempts", String(n));
+    } catch {
+      /* localStorage может быть недоступен — не критично */
+    }
+    setFinished(true);
+  };
+  const next = () => (round + 1 < total ? setRound(round + 1) : finish());
+  const restart = () => {
+    setRound(0);
+    setPicks([]);
+    setFinished(false);
+  };
+
+  return (
+    <div className="mt-8 rounded-[24px] border p-5 sm:p-6" style={{ borderColor: C.line, backgroundColor: C.card }}>
+      <SectionLabel>Телепатия</SectionLabel>
+      <p className="mt-2 text-[13px]" style={{ color: C.inkSoft }}>
+        давай познакомимся поближе — в игровой форме 🙂
+      </p>
+
+      {!finished && (
+        <>
+          <div className="mt-4 flex items-center justify-between text-[12px] uppercase tracking-[0.18em]" style={{ color: C.gold }}>
+            <span>
+              Факт {round + 1} из {total}
+            </span>
+            <span>{score} в точку</span>
+          </div>
+          <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full" style={{ backgroundColor: C.line }}>
+            <motion.div
+              className="h-full"
+              style={{ background: `linear-gradient(90deg, ${C.mint}, ${C.gold})` }}
+              animate={{ width: `${(picks.length / total) * 100}%` }}
+              transition={{ duration: 0.4 }}
+            />
+          </div>
+        </>
+      )}
+
+      <motion.div
+        layout
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-4 overflow-hidden px-1.5 py-1.5"
+        style={{ perspective: 1200 }}
+      >
+        <AnimatePresence mode="popLayout" initial={false}>
+          {finished ? (
+            <motion.div
+              key="result"
+              initial={{ opacity: 0, rotateY: -20, scale: 0.94 }}
+              animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformStyle: "preserve-3d" }}
+              className="space-y-4"
+            >
+              <ChatBubble side="left">Готово! Вот что у нас получилось 👇</ChatBubble>
+
+              <div className="rounded-2xl border p-5 text-center" style={{ borderColor: C.line, backgroundColor: C.cardHi }}>
+                <img
+                  src={score >= 3 ? "/telepathy/correct.png" : "/telepathy/wrong.png"}
+                  alt=""
+                  className="mx-auto h-24 w-24 rounded-2xl object-cover"
+                />
+                <p className="mt-4 text-4xl" style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: C.ink }}>
+                  {score} / {total}
+                </p>
+                <p className="mt-2 text-2xl" style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: C.goldSoft }}>
+                  {QUIZ_TITLES[score].title}
+                </p>
+                <p className="mt-1.5 text-[15px]" style={{ color: C.inkSoft }}>
+                  {QUIZ_TITLES[score].tagline}
+                </p>
+
+                {score === total && (
+                  <div className="mt-6 rounded-2xl border p-5 text-left" style={{ borderColor: C.gold, backgroundColor: C.card }}>
+                    <p className="text-[15px] font-semibold" style={{ color: C.gold, fontFamily: "var(--font-display)" }}>
+                      {QUIZ_SECRET.title}
+                    </p>
+                    <p className="mt-2 text-[14px] leading-relaxed" style={{ color: C.ink }}>
+                      {QUIZ_SECRET.intro}
+                    </p>
+                    <p className="mt-3 text-[14px] leading-relaxed" style={{ color: C.ink }}>
+                      {QUIZ_SECRET.instruction}
+                    </p>
+                    <p
+                      className="mt-3 text-center text-3xl font-bold tracking-[0.3em]"
+                      style={{ color: C.goldSoft, fontFamily: "var(--font-display)" }}
+                    >
+                      {password}
+                    </p>
+                    <div className="mt-4 text-center">
+                      <a
+                        href={QUIZ_SECRET.cta.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold"
+                        style={{ backgroundColor: C.gold, color: C.bg }}
+                      >
+                        {QUIZ_SECRET.cta.label}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={restart}
+                  className="mt-6 inline-flex items-center justify-center rounded-xl border px-5 py-2.5 text-sm font-semibold transition-transform active:scale-[0.98]"
+                  style={{ borderColor: C.line, color: C.ink, backgroundColor: "transparent" }}
+                >
+                  Сыграть заново
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={round}
+              initial={{ opacity: 0, rotateY: -22, x: 60, scale: 0.94 }}
+              animate={{ opacity: 1, rotateY: 0, x: 0, scale: 1 }}
+              exit={{ opacity: 0, rotateY: 22, x: -60, scale: 0.94 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformStyle: "preserve-3d" }}
+              className="space-y-3"
+            >
+              {/* Вопрос Ильи — единственная реплика с аватаркой над карточками */}
+              <ChatBubble side="left">{current.intro}</ChatBubble>
+
+              {/* 3 карточки-варианта с переворотом; оборот — компактный вердикт */}
+              <div className="grid gap-3 sm:grid-cols-3">
+                {current.statements.map((s, idx) => {
+                  const isLie = idx === current.lie;
+                  const isPicked = revealed && picks[round] === idx;
+                  return (
+                    <div key={idx} style={{ perspective: 1000 }} className="min-h-[112px]">
+                      <motion.div
+                        className="relative h-full min-h-[112px] w-full"
+                        style={{ transformStyle: "preserve-3d" }}
+                        initial={false}
+                        animate={{ rotateY: revealed && isPicked ? 180 : 0 }}
+                        transition={{ duration: 0.55, ease: "easeInOut" }}
+                      >
+                        {/* лицо — текст факта */}
+                        <button
+                          type="button"
+                          onClick={() => pick(idx)}
+                          disabled={revealed}
+                          className="absolute inset-0 flex items-center justify-center rounded-2xl border p-4 text-center text-[14px] leading-snug transition-all hover:border-[var(--g)]"
+                          style={
+                            {
+                              backfaceVisibility: "hidden",
+                              borderColor: C.line,
+                              backgroundColor: C.cardHi,
+                              color: C.ink,
+                              cursor: revealed ? "default" : "pointer",
+                              opacity: revealed && !isPicked ? 0.45 : 1,
+                              ["--g" as string]: C.gold,
+                            } as CSSProperties
+                          }
+                        >
+                          {s.text}
+                        </button>
+                        {/* оборот — короткий вердикт */}
+                        <div
+                          className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl border p-4 text-center"
+                          style={{
+                            backfaceVisibility: "hidden",
+                            transform: "rotateY(180deg)",
+                            borderColor: isLie ? C.mint : C.line,
+                            backgroundColor: C.cardHi,
+                            boxShadow: isPicked ? `0 0 0 2px ${isLie ? C.mint : lieColor}` : "none",
+                            opacity: !isLie && !isPicked ? 0.5 : 1,
+                          }}
+                        >
+                          <span className="text-[13px] font-bold uppercase tracking-[0.18em]" style={{ color: isLie ? C.mint : C.inkSoft }}>
+                            {isLie ? "Ложь" : "Правда"}
+                          </span>
+                          {isPicked && (
+                            <span className="text-[11px] font-semibold" style={{ color: isLie ? C.mint : lieColor }}>
+                              {isLie ? "✓ в точку" : "✗ мимо"}
+                            </span>
+                          )}
+                        </div>
+                      </motion.div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Комментарий Ильи к выбранному варианту — в чате */}
+              {revealed &&
+                (() => {
+                  const picked = picks[round];
+                  const correct = picked === current.lie;
+                  const accent = correct ? C.mint : lieColor;
+                  return !showComment ? (
+                    <TypingDots />
+                  ) : (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                      <ChatBubble side="left" accent={accent}>
+                        <span className="text-[12px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>
+                          {correct ? "Телепатия сработала!" : "А вот и мимо"}
+                        </span>
+                        <span className="mt-1.5 block whitespace-pre-line">{current.statements[picked].comment}</span>
+                        {current.statements[picked].video && (
+                          <div
+                            className="mt-3 overflow-hidden rounded-2xl border"
+                            style={{ borderColor: C.line }}
+                          >
+                            <video
+                              controls
+                              playsInline
+                              preload="metadata"
+                              className="block w-full bg-black"
+                              style={{ maxHeight: "60vh" }}
+                            >
+                              <source src={current.statements[picked].video} type="video/mp4" />
+                            </video>
+                          </div>
+                        )}
+                        {current.statements[picked].image && (
+                          <div
+                            className="mt-3 overflow-hidden rounded-2xl border"
+                            style={{ borderColor: C.line }}
+                          >
+                            <img
+                              src={current.statements[picked].image}
+                              alt=""
+                              loading="lazy"
+                              className="block w-full"
+                              style={{ maxHeight: "60vh", objectFit: "contain", backgroundColor: C.bg }}
+                            />
+                          </div>
+                        )}
+                      </ChatBubble>
+                      <div className="flex justify-end">
+                        <button
+                          onClick={next}
+                          className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-transform active:scale-[0.98]"
+                          style={{ backgroundColor: C.gold, color: C.bg }}
+                        >
+                          {round + 1 < total ? "Дальше" : "Узнать результат"}
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
+}
+
 function Community() {
-  const [open, setOpen] = useState(false);
   return (
     <section id="community" style={{ backgroundColor: C.bg2 }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-left-4 top-10 text-[11vw]">play</GhostTitle>
       <Container>
         <motion.div {...fadeUp} className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div className="space-y-4">
@@ -1103,40 +1716,7 @@ function Community() {
               </P>
             </div>
 
-            <div className="mt-8 rounded-[24px] border p-6" style={{ borderColor: C.line, backgroundColor: C.card }}>
-              <SectionLabel>ДаНет-ка</SectionLabel>
-              <p className="mt-2 text-[13px]" style={{ color: C.inkSoft }}>
-                попробуй разгадай
-              </p>
-              <p className="mt-3 text-lg italic leading-relaxed sm:text-xl" style={{ color: C.ink, fontFamily: "var(--font-display)" }}>
-                {RIDDLE.question}
-              </p>
-              <button
-                onClick={() => setOpen((v) => !v)}
-                className="mt-5 inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition-transform active:scale-[0.98]"
-                style={{ backgroundColor: C.gold, color: C.bg }}
-              >
-                {open ? "Спрятать разгадку" : "Показать разгадку"}
-              </button>
-              <AnimatePresence initial={false}>
-                {open && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="overflow-hidden"
-                  >
-                    <p className="mt-5 text-[15px] leading-relaxed" style={{ color: C.inkSoft }}>
-                      {RIDDLE.answer}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <p className="mt-5 text-[13px] italic" style={{ color: C.inkSoft }}>
-                Любишь думать? У меня таких — целая коллекция.
-              </p>
-            </div>
+            <GuessTruthQuiz />
           </div>
         </motion.div>
       </Container>
@@ -1146,9 +1726,141 @@ function Community() {
 
 // ---------------------------------------------------------------------------
 
+// Одна «летающая» карточка автора. Пока flying — кружит по случайной траектории;
+// поймали (клик по любой) — все возвращаются на свои места, выбранная подсвечивается.
+function FlyingAuthor({
+  name,
+  flying,
+  chosen,
+  cycle,
+  onCatch,
+}: {
+  name: string;
+  flying: boolean;
+  chosen: boolean;
+  cycle: number;
+  onCatch: () => void;
+}) {
+  // Случайная траектория, обновляется на каждый новый цикл полёта.
+  const path = useMemo(() => {
+    const rand = (min: number, max: number) => min + Math.random() * (max - min);
+    const steps = 4;
+    const xs = [0];
+    const ys = [0];
+    const rs = [0];
+    for (let s = 0; s < steps; s++) {
+      xs.push(rand(-140, 140));
+      ys.push(rand(-75, 75));
+      rs.push(rand(-16, 16));
+    }
+    xs.push(0);
+    ys.push(0);
+    rs.push(0);
+    return { xs, ys, rs, duration: rand(6, 10), delay: rand(0, 1.4) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cycle]);
+
+  return (
+    <motion.span
+      onClick={onCatch}
+      animate={
+        flying
+          ? { x: path.xs, y: path.ys, rotate: path.rs, scale: 1 }
+          : { x: 0, y: 0, rotate: 0, scale: chosen ? 1.06 : 1 }
+      }
+      transition={
+        flying
+          ? { duration: path.duration, delay: path.delay, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }
+          : { type: "spring", stiffness: 240, damping: 20 }
+      }
+      whileHover={{ scale: 1.08 }}
+      className="cursor-pointer select-none rounded-full border px-4 py-2 text-[14px]"
+      style={{
+        borderColor: chosen ? C.gold : C.line,
+        backgroundColor: chosen ? "rgba(201,168,76,0.16)" : C.cardHi,
+        color: chosen ? C.goldSoft : C.ink,
+        fontFamily: "var(--font-display)",
+        willChange: "transform",
+        boxShadow: chosen ? "0 0 0 1px rgba(201,168,76,0.5), 0 8px 28px rgba(201,168,76,0.18)" : "none",
+      }}
+    >
+      {name}
+    </motion.span>
+  );
+}
+
+function FlyingAuthors() {
+  const [chosen, setChosen] = useState<(typeof AUTHORS)[number] | null>(null);
+  const [cycle, setCycle] = useState(0);
+
+  function handleCatch(a: (typeof AUTHORS)[number]) {
+    setChosen(a);
+  }
+
+  // Поймали — держим 10 секунд на местах, затем снова разлетаются (новые траектории).
+  useEffect(() => {
+    if (!chosen) return;
+    const t = setTimeout(() => {
+      setChosen(null);
+      setCycle((c) => c + 1);
+    }, 10000);
+    return () => clearTimeout(t);
+  }, [chosen]);
+
+  return (
+    <div className="mt-6">
+      <AnimatePresence mode="wait">
+        {chosen ? (
+          <motion.div
+            key={chosen.name}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3 }}
+            className="mb-4 max-w-2xl text-[14px] leading-relaxed"
+            style={{ color: C.inkSoft }}
+          >
+            <span style={{ color: C.goldSoft, fontFamily: "var(--font-display)" }}>{chosen.name}</span>{" "}
+            — {chosen.note}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="invite"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3 }}
+            className="mb-4 max-w-2xl text-[13px] leading-relaxed"
+            style={{ color: C.gold }}
+          >
+            Мудрость не сидит на полке и в руки просто так не даётся — она ускользает, как мысль на грани сна. Среди этих
+            авторов наверняка есть кто-то близкий и тебе. Поймай на лету того, кто откликается больше всего, — расскажу,
+            что я у него читал или чему у него учился. (Кликни по летящей карточке.)
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="relative flex flex-wrap gap-2.5">
+        {AUTHORS.map((a) => (
+          <FlyingAuthor
+            key={a.name}
+            name={a.name}
+            flying={!chosen}
+            chosen={chosen?.name === a.name}
+            cycle={cycle}
+            onCatch={() => handleCatch(a)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
 function Meaning() {
   return (
     <section id="meaning" style={{ backgroundColor: C.bg }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-right-6 bottom-8 text-[10vw]">meaning</GhostTitle>
       <Container>
         {/* текст слева, фото справа */}
         <motion.div {...fadeUp} className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
@@ -1197,17 +1909,7 @@ function Meaning() {
           <p className="mt-2 max-w-3xl text-[15px] leading-relaxed" style={{ color: C.inkSoft }}>
             То, что успел вспомнить из прочитанного на тему самопознания и развития — список наверняка неполный. Некоторые из этих книг стали моими песнями: «Мирный воин», «Инкогнито Бог», «Трансерфинг».
           </p>
-          <div className="mt-6 flex flex-wrap gap-2.5">
-            {AUTHORS.map((a) => (
-              <span
-                key={a}
-                className="rounded-full border px-4 py-2 text-[14px]"
-                style={{ borderColor: C.line, backgroundColor: C.cardHi, color: C.ink, fontFamily: "var(--font-display)" }}
-              >
-                {a}
-              </span>
-            ))}
-          </div>
+          <FlyingAuthors />
         </motion.div>
       </Container>
     </section>
@@ -1216,9 +1918,92 @@ function Meaning() {
 
 // ---------------------------------------------------------------------------
 
+const TRAVEL_PHOTOS = [
+  { src: "/travel/sunrise.jpg", cap: "Алтай", desc: "Рассветы в горах и тишина на йога-туре — то, ради чего и едешь." },
+  { src: "/travel/baikal.jpg", cap: "Байкал · Ольхон", desc: "Остров Ольхон посреди священного озера — медитации у самой воды." },
+  { src: "/travel/thailand.jpg", cap: "Таиланд · о. Джеймса Бонда", desc: "Скала Ко Тапу в заливе Пханг-Нга — та самая из фильма «Человек с золотым пистолетом»." },
+  { src: "/travel/sochi.jpg", cap: "Сочи", desc: "Мой новый дом у моря: горы, набережная и обычная рабочая жизнь в одном городе." },
+  { src: "/travel/crimea.jpg", cap: "Крым · Новый Свет", desc: "Можжевеловые тропы и бирюзовые бухты на берегу Чёрного моря." },
+  { src: "/travel/turkey.jpg", cap: "Турция · Фаселис", desc: "Античные руины прямо у воды, среди трёх живописных бухт." },
+  { src: "/travel/paris.jpg", cap: "Париж", desc: "Прогулки по городу, который раньше видел только в кино." },
+  { src: "/travel/india.jpg", cap: "Индия", desc: "Страна контрастов и духовных практик — там по-особому слышишь себя.", pos: "top" },
+];
+
+// Полоса путешествий: аккуратные миниатюры (cover, без полос),
+// по клику — лайтбокс на весь экран, фото целиком в своём формате, без обрезки.
+function TravelGallery() {
+  // Лайтбокс на Fancybox 5: зум колесом/щипком, лента миниатюр, свайпы, клавиатура.
+  // Подпись формируем из cap + desc (HTML разрешён в data-caption).
+  useEffect(() => {
+    Fancybox.bind('[data-fancybox="travel"]', {
+      Carousel: { transition: "slide" },
+      Thumbs: { type: "classic" },
+      Images: { zoom: true, Panzoom: { maxScale: 3 } },
+      Toolbar: {
+        display: {
+          left: ["infobar"],
+          middle: ["zoomIn", "zoomOut"],
+          right: ["slideshow", "thumbs", "close"],
+        },
+      },
+    });
+    return () => Fancybox.unbind('[data-fancybox="travel"]');
+  }, []);
+
+  return (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      {TRAVEL_PHOTOS.map((p) => (
+        <motion.a
+          key={p.src}
+          href={p.src}
+          data-fancybox="travel"
+          data-caption={`<span style="font-family:var(--font-display);text-transform:uppercase;letter-spacing:0.18em;color:${C.goldSoft}">${p.cap}</span><br><span style="color:${C.inkSoft}">${p.desc}</span>`}
+          whileHover={{ y: -6 }}
+          transition={{ type: "spring", stiffness: 260, damping: 22 }}
+          className="group relative block aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-[22px] border shadow-[0_20px_50px_-25px_rgba(0,0,0,0.7)] hover:shadow-[0_45px_80px_-30px_rgba(0,0,0,0.85)]"
+          style={{ backgroundColor: C.bg, borderColor: C.line }}
+          aria-label={`Открыть фото: ${p.cap}`}
+        >
+          <span
+            className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs"
+            style={{ color: "rgba(241,236,221,0.4)" }}
+            aria-hidden
+          >
+            {p.cap}
+          </span>
+          <img
+            src={p.src}
+            alt={p.cap}
+            loading="lazy"
+            style={{ objectPosition: p.pos ?? "center" }}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.12]"
+            onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+          {/* значок «открыть» */}
+          <span
+            className="absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-full opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100"
+            style={{ backgroundColor: "rgba(0,0,0,0.45)", color: C.goldSoft }}
+            aria-hidden
+          >
+            <Maximize2 size={15} />
+          </span>
+          <span
+            className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 p-3 text-left text-[11px] uppercase tracking-[0.16em] opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100"
+            style={{ color: C.goldSoft, fontFamily: "var(--font-display)" }}
+          >
+            {p.cap}
+          </span>
+        </motion.a>
+      ))}
+    </div>
+  );
+}
+
 function Travel() {
   return (
     <section style={{ backgroundColor: C.bg2 }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-left-6 top-8 text-[11vw]">travel</GhostTitle>
       <Container>
         {/* Ряд 1: текст слева, видео справа — ровные колонки */}
         <motion.div {...fadeUp} className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
@@ -1259,21 +2044,9 @@ function Travel() {
           </div>
         </motion.div>
 
-        {/* Ряд 2: фото-полоса во всю ширину */}
-        <motion.div {...fadeUp} className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            { src: "/travel/sunrise.jpg", cap: "Алтай" },
-            { src: "/travel/baikal.jpg", cap: "Байкал · Ольхон" },
-            { src: "/travel/sochi.jpg", cap: "Сочи" },
-            { src: "/travel/thailand.jpg", cap: "Таиланд" },
-          ].map((p) => (
-            <div key={p.src}>
-              <PhotoFrame src={p.src} alt={p.cap} aspect="aspect-[4/3]" parallax={8} />
-              <p className="mt-2 text-center text-[11px] uppercase tracking-[0.14em]" style={{ color: C.inkSoft }}>
-                {p.cap}
-              </p>
-            </div>
-          ))}
+        {/* Ряд 2: фото-полоса во всю ширину — кликни, чтобы открыть крупно */}
+        <motion.div {...fadeUp} className="mt-10">
+          <TravelGallery />
         </motion.div>
       </Container>
     </section>
@@ -1303,7 +2076,7 @@ function Family() {
       <H2>Мои самые близкие</H2>
       <div className="mt-6 space-y-5">
         <P>
-          С женой мы вместе уже двадцать лет. Тема самопознания всплыла ещё при первом знакомстве и сильно помогла нам сблизиться: нас многое объединяет, и во многом мы дополняем друг друга. Она удивительно творческий человек и поёт просто шикарно — по сути, именно она привела меня в музыку.
+          С женой мы вместе уже восемнадцать лет. Тема самопознания всплыла ещё при первом знакомстве и сильно помогла нам сблизиться: нас многое объединяет, и во многом мы дополняем друг друга. Она удивительно творческий человек и поёт просто шикарно — по сути, именно она привела меня в музыку.
         </P>
         <P>
           Вместе ходили на йогу и ездили в йога-туры, а сейчас путешествуем. И в Сочи мы переехали тоже благодаря ей. А ещё мы растим сына — прекрасного, талантливого человека, в котором сочетаются все наши лучшие качества!
@@ -1316,15 +2089,16 @@ function Family() {
 function Contacts() {
   return (
     <section style={{ backgroundColor: C.bg2 }} className="relative overflow-hidden py-24 sm:py-32">
+      <GhostTitle className="-right-4 bottom-0 text-[11vw]">hello</GhostTitle>
       <Glow className="left-1/2 bottom-[-10%] h-[420px] w-[640px] -translate-x-1/2" />
       <Container>
         <motion.div {...fadeUp} className="mx-auto max-w-3xl text-center">
           <div className="flex justify-center">
             <SectionLabel>Найти меня</SectionLabel>
           </div>
-          <H2>Если захочется написать — пишите</H2>
+          <H2>Давайте на связи</H2>
           <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed" style={{ color: C.inkSoft }}>
-            Не обещаю отвечать в ту же секунду — но прочитаю обязательно. И по делу, и просто так — отвечу с радостью.
+            Вот мои контакты. Буду рад пообщаться — вживую или здесь, в сети. Пишите: по делу или просто так.
           </p>
         </motion.div>
 
@@ -1347,9 +2121,54 @@ function Contacts() {
           ))}
         </motion.div>
 
-        <p className="mt-16 text-center text-[12px] uppercase tracking-[0.25em]" style={{ color: C.inkSoft }}>
-          © {new Date().getFullYear()} Илья Бормотов
-        </p>
+        {/* Финальный «звёздный» блок — эффект Sparkles */}
+        <div className="relative mt-20 w-full">
+          <div className="relative z-10 flex items-baseline justify-center gap-2.5 sm:gap-3">
+            <h3
+              className="text-[22px] leading-none sm:text-[28px]"
+              style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: C.ink }}
+            >
+              Илья Бормотов
+            </h3>
+            <span
+              className="text-[22px] leading-none sm:text-[28px]"
+              style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: C.inkSoft }}
+            >
+              © {new Date().getFullYear()}
+            </span>
+          </div>
+
+          <div className="relative mx-auto mt-4 h-44 w-full max-w-[820px]">
+            {/* светящиеся градиентные линии */}
+            <span
+              className="absolute inset-x-[8%] top-0 h-[2px]"
+              style={{ background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)` }}
+            />
+            <span
+              className="absolute inset-x-[8%] top-0 h-[6px] blur-sm"
+              style={{ background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)` }}
+            />
+            <span
+              className="absolute inset-x-[24%] top-0 h-px"
+              style={{ background: `linear-gradient(90deg, transparent, ${C.mint}, transparent)` }}
+            />
+            <span
+              className="absolute inset-x-[24%] top-0 h-[4px] blur-[2px]"
+              style={{ background: `linear-gradient(90deg, transparent, ${C.mint}, transparent)` }}
+            />
+
+            {/* поле искр, замаскированное по краям (без сплошной подложки — фон-«hello» остаётся виден) */}
+            <div
+              className="absolute inset-0"
+              style={{
+                maskImage: "radial-gradient(640px 170px at top center, black 30%, transparent 82%)",
+                WebkitMaskImage: "radial-gradient(640px 170px at top center, black 30%, transparent 82%)",
+              }}
+            >
+              <SparklesCore className="h-full w-full" color={C.goldSoft} density={140} />
+            </div>
+          </div>
+        </div>
       </Container>
     </section>
   );
