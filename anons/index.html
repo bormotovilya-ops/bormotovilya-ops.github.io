@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI для разработчика 1С — анонс</title>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body class="bg-art">
+
+  <main class="wrap screen">
+
+    <!-- ===== Заголовок ===== -->
+    <header class="hero">
+      <div class="kicker" style="margin-bottom:14px;">
+        <span class="badge"><span class="dot"></span> Открытое демо · AI + 1С</span>
+      </div>
+      <h1 class="h-hero">AI, который пишет<br><span class="grad-text">код 1С вместе с вами</span></h1>
+      <p class="lead" style="margin-top:14px;">
+        Час практики с нейросетью на реальном 1С-проекте — от подготовки до рабочего
+        результата. Без долгой теории: смотрим, как это устроено, и пробуем сами.
+      </p>
+    </header>
+
+    <!-- ===== Темы (4 пункта, без раскрытия) ===== -->
+    <section class="section">
+      <span class="eyebrow" style="display:block; margin-bottom:14px;">Маршрут встречи</span>
+      <div class="cards compact">
+        <article class="card mini">
+          <span class="num">01</span>
+          <h3>Зачем 1С-нику AI</h3>
+          <p>Что меняется в работе разработчика — и почему уже сейчас.</p>
+        </article>
+        <article class="card mini">
+          <span class="num">02</span>
+          <h3>AI понимает вашу 1С</h3>
+          <p>Как дать нейросети «увидеть» вашу конфигурацию и её объекты.</p>
+        </article>
+        <article class="card mini">
+          <span class="num">03</span>
+          <h3>Решение вживую</h3>
+          <p>От задачи до рабочего результата прямо на встрече, по шагам.</p>
+        </article>
+        <article class="card mini">
+          <span class="num">04</span>
+          <h3>Заберите к себе</h3>
+          <p>Что поставить, как настроить и куда расти дальше.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== Реквизиты + CTA в одну зону ===== -->
+    <section class="section">
+      <div class="cta" style="display:flex; flex-wrap:wrap; gap:24px; align-items:center; justify-content:space-between; text-align:left;">
+        <div class="meta-row">
+          <div class="item">
+            <span class="label">Когда</span>
+            <span class="value">01.07.2026 · 14:00</span>
+          </div>
+          <div class="item">
+            <span class="label">Формат</span>
+            <span class="value">Созвон · ≈ 60 мин</span>
+          </div>
+          <div class="item speaker">
+            <span class="label">Ведущий</span>
+            <span class="row">
+              <img class="speaker-ava" src="assets/speaker.jpg" alt="Илья Бормотов">
+              <span class="value">Илья Бормотов</span>
+            </span>
+          </div>
+        </div>
+        <button class="btn" type="button" id="signupBtn">Записаться на созвон →</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Модальное окно записи ===== -->
+  <div class="modal-backdrop" id="signupModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="signupTitle">
+      <button class="close" type="button" id="signupClose" aria-label="Закрыть">✕</button>
+      <h3 id="signupTitle">Запись на созвон</h3>
+      <p class="sub">01.07.2026 · 14:00 · ведущий — Илья Бормотов</p>
+
+      <form id="signupForm">
+        <div class="field">
+          <label for="fName">Ваше имя <span style="color:var(--accent)">*</span></label>
+          <input type="text" id="fName" name="name" placeholder="Например, Иван Петров" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="fComment">Комментарий <small class="muted">(необязательно)</small></label>
+          <input type="text" id="fComment" name="comment" placeholder="Вопрос или пожелание" autocomplete="off">
+        </div>
+        <button class="btn" type="submit" id="signupSubmit">Записаться</button>
+        <div class="form-status" id="signupStatus" aria-live="polite"></div>
+        <p class="form-note">Имя попадёт в список участников. Перед встречей напомним.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // === Куда отправлять записи ===
+    // Вставьте сюда URL вашего Google Apps Script веб-приложения
+    // (как получить — см. файл «Подключение-формы.md»).
+    const ENDPOINT = "https://script.google.com/macros/s/AKfycbwqwYF-Cg1cD5YyNjvQp50k8mDpR_BGB8vmjUOhn4TZwurOezR-oaelubpN1Ci5VYtA/exec";
+
+    const modal   = document.getElementById('signupModal');
+    const openBtn = document.getElementById('signupBtn');
+    const closeBtn= document.getElementById('signupClose');
+    const form    = document.getElementById('signupForm');
+    const status  = document.getElementById('signupStatus');
+    const submit  = document.getElementById('signupSubmit');
+
+    const open  = () => { modal.classList.add('open'); document.getElementById('fName').focus(); };
+    const close = () => { modal.classList.remove('open'); status.textContent = ''; status.className = 'form-status'; };
+
+    openBtn.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', e => { if (e.target === modal) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = form.name.value.trim();
+      if (!name) return;
+
+      if (ENDPOINT.startsWith("ВСТАВЬТЕ")) {
+        status.className = 'form-status err';
+        status.textContent = 'Форма ещё не подключена к таблице (нужен URL Apps Script).';
+        return;
+      }
+
+      submit.disabled = true;
+      status.className = 'form-status';
+      status.textContent = 'Отправляем…';
+
+      try {
+        await fetch(ENDPOINT, {
+          method: 'POST',
+          mode: 'no-cors', // Apps Script не отдаёт CORS-заголовки; запись всё равно проходит
+          body: new URLSearchParams({ name, comment: form.comment.value.trim() })
+        });
+        status.className = 'form-status ok';
+        status.textContent = '✓ Готово! Вы в списке. Перед встречей напомним.';
+        form.reset();
+      } catch (err) {
+        status.className = 'form-status err';
+        status.textContent = 'Не удалось отправить. Попробуйте ещё раз.';
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>
