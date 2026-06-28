@@ -262,6 +262,7 @@ const COVER_AUDIO = [
   { title: "Вдох-выдох", artist: "T9", src: "/covers/vdoh-vydoh.mp3" },
   { title: "When You Know", artist: "Scorpions", src: "/covers/when-you-know.mp3" },
   { title: "Тайна хозяйки старинных часов", artist: "КиШ", src: "/covers/tayna.mp3" },
+  { title: "Пророк", artist: "Кипелов", src: "/covers/prorok.mp3" },
 ];
 
 const STARMAKER_URL =
