@@ -60,7 +60,7 @@
           </div>
           <div class="item">
             <span class="label">Где</span>
-            <a class="value" href="https://telemost.yandex.ru/j/21238817285285" target="_blank" rel="noopener">Яндекс Телемост →</a>
+            <a class="value" href="https://telemost.yandex.ru/j/21238817285285" target="_blank" rel="noopener" style="color:var(--text); text-decoration:underline;">Яндекс Телемост →</a>
           </div>
           <div class="item speaker">
             <span class="label">Ведущий</span>
@@ -142,7 +142,7 @@
           body: new URLSearchParams({ name, comment: form.comment.value.trim() })
         });
         status.className = 'form-status ok';
-        status.innerHTML = '✓ Готово! Вы в списке. Перед встречей напомним.<br>Ссылка на встречу: <a href="https://telemost.yandex.ru/j/21238817285285" target="_blank" rel="noopener">Яндекс Телемост →</a>';
+        status.innerHTML = '✓ Готово! Вы в списке. Перед встречей напомним.<br>Ссылка на встречу: <a href="https://telemost.yandex.ru/j/21238817285285" target="_blank" rel="noopener" style="color:var(--text); text-decoration:underline;">Яндекс Телемост →</a>';
         form.reset();
       } catch (err) {
         status.className = 'form-status err';
