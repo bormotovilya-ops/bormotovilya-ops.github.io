@@ -12,9 +12,6 @@
 
     <!-- ===== Заголовок ===== -->
     <header class="hero">
-      <div class="kicker" style="margin-bottom:14px;">
-        <span class="badge"><span class="dot"></span> Открытое демо · AI + 1С</span>
-      </div>
       <h1 class="h-hero">AI, который пишет<br><span class="grad-text">код 1С вместе с вами</span></h1>
       <p class="lead" style="margin-top:14px;">
         Час практики с нейросетью на реальном 1С-проекте — от подготовки до рабочего
@@ -60,6 +57,10 @@
           <div class="item">
             <span class="label">Формат</span>
             <span class="value">Созвон · ≈ 60 мин</span>
+          </div>
+          <div class="item">
+            <span class="label">Где</span>
+            <a class="value" href="https://telemost.yandex.ru/j/21238817285285" target="_blank" rel="noopener">Яндекс Телемост →</a>
           </div>
           <div class="item speaker">
             <span class="label">Ведущий</span>
@@ -141,7 +142,7 @@
           body: new URLSearchParams({ name, comment: form.comment.value.trim() })
         });
         status.className = 'form-status ok';
-        status.textContent = '✓ Готово! Вы в списке. Перед встречей напомним.';
+        status.innerHTML = '✓ Готово! Вы в списке. Перед встречей напомним.<br>Ссылка на встречу: <a href="https://telemost.yandex.ru/j/21238817285285" target="_blank" rel="noopener">Яндекс Телемост →</a>';
         form.reset();
       } catch (err) {
         status.className = 'form-status err';
