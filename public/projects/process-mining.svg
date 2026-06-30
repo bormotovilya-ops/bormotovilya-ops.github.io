@@ -1,101 +1,185 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 682" width="1024" height="682" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 682" width="1024" height="682" fill="none" font-family="'Sora','Segoe UI',sans-serif">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#063A2B"/>
       <stop offset="1" stop-color="#04251B"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.6">
-      <stop offset="0" stop-color="#37C99A" stop-opacity="0.22"/>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0" stop-color="#37C99A" stop-opacity="0.18"/>
       <stop offset="1" stop-color="#37C99A" stop-opacity="0"/>
     </radialGradient>
-    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="6"/>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
     </filter>
-    <marker id="arrGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="#C9A84C" fill-opacity="0.7"/>
+    <marker id="aG" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#C9A84C" fill-opacity="0.75"/>
     </marker>
-    <marker id="arrMint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id="aM" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 z" fill="#37C99A"/>
+    </marker>
+    <marker id="aL" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#C9A84C" fill-opacity="0.5"/>
     </marker>
   </defs>
 
   <rect width="1024" height="682" fill="url(#bg)"/>
   <rect width="1024" height="682" fill="url(#glow)"/>
 
-  <!-- тонкая сетка -->
-  <g stroke="#C9A84C" stroke-opacity="0.06" stroke-width="1">
-    <path d="M0 170 H1024 M0 341 H1024 M0 512 H1024"/>
-    <path d="M256 0 V682 M512 0 V682 M768 0 V682"/>
+  <!-- сетка -->
+  <g stroke="#C9A84C" stroke-opacity="0.05" stroke-width="1">
+    <path d="M0 140 H1024 M0 235 H1024 M0 341 H1024 M0 447 H1024 M0 540 H1024"/>
+    <path d="M170 0 V682 M345 0 V682 M520 0 V682 M695 0 V682 M860 0 V682"/>
   </g>
 
-  <!-- цифровые следы: точки-события -->
-  <g fill="#E8D89A" fill-opacity="0.5">
-    <circle cx="90" cy="120" r="2.5"/><circle cx="180" cy="560" r="2"/>
-    <circle cx="470" cy="90" r="2"/><circle cx="610" cy="600" r="2.5"/>
-    <circle cx="930" cy="150" r="2"/><circle cx="860" cy="560" r="2.5"/>
-    <circle cx="330" cy="620" r="2"/><circle cx="700" cy="60" r="2"/>
+  <!-- ================= ДУГИ (переходы) ================= -->
+  <g stroke="#C9A84C" stroke-opacity="0.4" stroke-width="2" fill="none" marker-end="url(#aG)">
+    <path d="M129 341 C158.7 341 165.3 447 195 447"/>            <!-- S→N2 -->
+    <path d="M315 235 C339.75 235 345.25 140 370 140"/>          <!-- N1→N3 -->
+    <path d="M315 447 C339.75 447 345.25 341 370 341"/>          <!-- N2→N4 -->
+    <path d="M315 447 C339.75 447 345.25 540 370 540"/>          <!-- N2→N5 -->
+    <path d="M490 140 L545 140"/>                                <!-- N3→N6 -->
+    <path d="M490 341 C514.75 341 520.25 140 545 140"/>          <!-- N4→N6 -->
+    <path d="M490 540 C514.75 540 520.25 341 545 341"/>          <!-- N5→N7 -->
+    <path d="M490 540 L545 540"/>                                <!-- N5→N8 -->
+    <path d="M665 140 C689.75 140 695.25 235 720 235"/>          <!-- N6→N9 -->
+    <path d="M665 341 C689.75 341 695.25 447 720 447"/>          <!-- N7→N10 -->
+    <path d="M665 540 C689.75 540 695.25 447 720 447"/>          <!-- N8→N10 -->
+    <path d="M840 447 C871.95 447 879.05 341 911 341"/>          <!-- N10→E -->
+  </g>
+  <!-- более тонкие/кросс-переходы -->
+  <g stroke="#C9A84C" stroke-opacity="0.24" stroke-width="1.6" fill="none" marker-end="url(#aG)">
+    <path d="M315 235 C345 235 350 540 370 540"/>               <!-- N1→N5 (skip) -->
+    <path d="M490 140 C514.75 140 520.25 341 545 341"/>          <!-- N3→N7 -->
+    <path d="M490 341 C520 341 525 540 545 540"/>                <!-- N4→N8 -->
   </g>
 
-  <!-- второстепенные рёбра графа процесса -->
-  <g stroke="#C9A84C" stroke-opacity="0.35" stroke-width="2" marker-end="url(#arrGold)" fill="none">
-    <path d="M196 380 C 280 470, 300 470, 332 446"/>
-    <path d="M388 470 C 470 470, 480 420, 524 378"/>
-    <path d="M340 230 C 360 300, 360 360, 348 410"/>
-    <path d="M588 372 C 660 440, 690 450, 724 452"/>
-    <path d="M796 452 C 840 420, 845 390, 856 366"/>
+  <!-- петли доработки (rework) -->
+  <g stroke="#C9A84C" stroke-opacity="0.5" stroke-width="1.8" stroke-dasharray="5 5" fill="none" marker-end="url(#aL)">
+    <path d="M605 312 C560 248 475 248 432 310"/>               <!-- N7→N4 -->
+    <path d="M605 569 C560 632 475 632 432 570"/>               <!-- N8→N5 -->
   </g>
 
-  <!-- обнаруженный (главный) путь — мятный, со свечением -->
-  <g filter="url(#soft)" stroke="#37C99A" stroke-opacity="0.55" stroke-width="7" fill="none">
-    <path d="M180 341 C 260 250, 280 210, 332 210"/>
-    <path d="M380 210 C 470 210, 480 280, 524 330"/>
-    <path d="M588 330 C 660 250, 690 224, 724 224"/>
-    <path d="M796 240 C 850 280, 860 300, 884 330"/>
+  <!-- ================= ОСНОВНОЙ ПОТОК (mint) ================= -->
+  <g filter="url(#soft)" stroke="#37C99A" stroke-opacity="0.5" stroke-width="8" fill="none">
+    <path d="M129 341 C158.7 341 165.3 235 195 235"/>
+    <path d="M315 235 C339.75 235 345.25 341 370 341"/>
+    <path d="M490 341 L545 341"/>
+    <path d="M665 341 C689.75 341 695.25 235 720 235"/>
+    <path d="M840 235 C871.95 235 879.05 341 911 341"/>
   </g>
-  <g stroke="#37C99A" stroke-width="3" marker-end="url(#arrMint)" fill="none">
-    <path d="M180 341 C 260 250, 280 210, 332 210"/>
-    <path d="M380 210 C 470 210, 480 280, 524 330"/>
-    <path d="M588 330 C 660 250, 690 224, 724 224"/>
-    <path d="M796 240 C 850 280, 860 300, 884 330"/>
+  <g stroke="#37C99A" stroke-width="3.2" fill="none" marker-end="url(#aM)">
+    <path d="M129 341 C158.7 341 165.3 235 195 235"/>            <!-- S→N1 -->
+    <path d="M315 235 C339.75 235 345.25 341 370 341"/>          <!-- N1→N4 -->
+    <path d="M490 341 L545 341"/>                                <!-- N4→N7 -->
+    <path d="M665 341 C689.75 341 695.25 235 720 235"/>          <!-- N7→N9 -->
+    <path d="M840 235 C871.95 235 879.05 341 911 341"/>          <!-- N9→E -->
   </g>
 
-  <!-- узлы процесса -->
-  <g>
-    <!-- start -->
-    <circle cx="150" cy="341" r="34" fill="#04251B" stroke="#37C99A" stroke-width="3"/>
-    <circle cx="150" cy="341" r="11" fill="#37C99A"/>
+  <!-- метки частот на основном потоке -->
+  <g font-size="12" font-weight="700" fill="#E8D89A" text-anchor="middle">
+    <g><rect x="146" y="278" width="36" height="18" rx="6" fill="#04251B" stroke="#37C99A" stroke-opacity="0.4"/><text x="164" y="291">1240</text></g>
+    <g><rect x="324" y="278" width="34" height="18" rx="6" fill="#04251B" stroke="#37C99A" stroke-opacity="0.4"/><text x="341" y="291">980</text></g>
+    <g><rect x="500" y="318" width="34" height="18" rx="6" fill="#04251B" stroke="#37C99A" stroke-opacity="0.4"/><text x="517" y="331">870</text></g>
+    <g><rect x="675" y="278" width="34" height="18" rx="6" fill="#04251B" stroke="#37C99A" stroke-opacity="0.4"/><text x="692" y="291">760</text></g>
+  </g>
 
-    <!-- задачи (прямоугольные ноды) -->
-    <g>
-      <rect x="318" y="184" width="64" height="52" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="3"/>
-      <rect x="332" y="200" width="36" height="5" rx="2.5" fill="#E8D89A"/>
-      <rect x="332" y="214" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.7"/>
-    </g>
-    <g>
-      <rect x="318" y="420" width="64" height="52" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.5" stroke-opacity="0.7"/>
-      <rect x="332" y="436" width="36" height="5" rx="2.5" fill="#F1ECDD" fill-opacity="0.8"/>
-      <rect x="332" y="450" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.6"/>
-    </g>
+  <!-- ================= УЗЛЫ ================= -->
+  <!-- start -->
+  <circle cx="95" cy="341" r="32" fill="#04251B" stroke="#37C99A" stroke-width="3"/>
+  <circle cx="95" cy="341" r="10" fill="#37C99A"/>
+  <!-- end -->
+  <circle cx="945" cy="341" r="32" fill="#04251B" stroke="#C9A84C" stroke-width="3.5"/>
+  <circle cx="945" cy="341" r="18" fill="none" stroke="#37C99A" stroke-width="3"/>
 
-    <!-- ветвление (gateway, ромб) -->
-    <g transform="translate(556 341)">
-      <rect x="-26" y="-26" width="52" height="52" rx="10" transform="rotate(45)" fill="#063A2B" stroke="#C9A84C" stroke-width="2.5"/>
-      <path d="M-10 0 H10 M0 -10 V10" stroke="#E8D89A" stroke-width="3" stroke-linecap="round"/>
-    </g>
+  <!-- узлы-активности: g(cx,cy) -->
+  <!-- N1 main -->
+  <g transform="translate(195,206)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="2.5"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.85"/>
+    <rect x="14" y="28" width="50" height="6" rx="3" fill="#37C99A" fill-opacity="0.8"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#37C99A" fill-opacity="0.16" stroke="#37C99A" stroke-opacity="0.5"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">1240</text>
+  </g>
+  <!-- N2 -->
+  <g transform="translate(195,418)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.2" stroke-opacity="0.7"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.7"/>
+    <rect x="14" y="28" width="44" height="6" rx="3" fill="#C9A84C" fill-opacity="0.7"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#C9A84C" fill-opacity="0.12" stroke="#C9A84C" stroke-opacity="0.4"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">760</text>
+  </g>
+  <!-- N3 -->
+  <g transform="translate(370,111)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.2" stroke-opacity="0.7"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.7"/>
+    <rect x="14" y="28" width="48" height="6" rx="3" fill="#C9A84C" fill-opacity="0.7"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#C9A84C" fill-opacity="0.12" stroke="#C9A84C" stroke-opacity="0.4"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">430</text>
+  </g>
+  <!-- N4 main -->
+  <g transform="translate(370,312)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="2.5"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.85"/>
+    <rect x="14" y="28" width="52" height="6" rx="3" fill="#37C99A" fill-opacity="0.8"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#37C99A" fill-opacity="0.16" stroke="#37C99A" stroke-opacity="0.5"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">980</text>
+  </g>
+  <!-- N5 -->
+  <g transform="translate(370,511)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.2" stroke-opacity="0.7"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.7"/>
+    <rect x="14" y="28" width="40" height="6" rx="3" fill="#C9A84C" fill-opacity="0.7"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#C9A84C" fill-opacity="0.12" stroke="#C9A84C" stroke-opacity="0.4"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">520</text>
+  </g>
+  <!-- N6 -->
+  <g transform="translate(545,111)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.2" stroke-opacity="0.7"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.7"/>
+    <rect x="14" y="28" width="46" height="6" rx="3" fill="#C9A84C" fill-opacity="0.7"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#C9A84C" fill-opacity="0.12" stroke="#C9A84C" stroke-opacity="0.4"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">610</text>
+  </g>
+  <!-- N7 main -->
+  <g transform="translate(545,312)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="2.5"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.85"/>
+    <rect x="14" y="28" width="50" height="6" rx="3" fill="#37C99A" fill-opacity="0.8"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#37C99A" fill-opacity="0.16" stroke="#37C99A" stroke-opacity="0.5"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">870</text>
+  </g>
+  <!-- N8 -->
+  <g transform="translate(545,511)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.2" stroke-opacity="0.7"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.7"/>
+    <rect x="14" y="28" width="38" height="6" rx="3" fill="#C9A84C" fill-opacity="0.7"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#C9A84C" fill-opacity="0.12" stroke="#C9A84C" stroke-opacity="0.4"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">300</text>
+  </g>
+  <!-- N9 main -->
+  <g transform="translate(720,206)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="2.5"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.85"/>
+    <rect x="14" y="28" width="48" height="6" rx="3" fill="#37C99A" fill-opacity="0.8"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#37C99A" fill-opacity="0.16" stroke="#37C99A" stroke-opacity="0.5"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">760</text>
+  </g>
+  <!-- N10 -->
+  <g transform="translate(720,418)">
+    <rect width="120" height="58" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.2" stroke-opacity="0.7"/>
+    <rect x="14" y="14" width="74" height="7" rx="3.5" fill="#F1ECDD" fill-opacity="0.7"/>
+    <rect x="14" y="28" width="44" height="6" rx="3" fill="#C9A84C" fill-opacity="0.7"/>
+    <rect x="70" y="38" width="38" height="14" rx="7" fill="#C9A84C" fill-opacity="0.12" stroke="#C9A84C" stroke-opacity="0.4"/>
+    <text x="89" y="48" font-size="9" font-weight="700" fill="#E8D89A" text-anchor="middle">540</text>
+  </g>
 
-    <g>
-      <rect x="692" y="198" width="64" height="52" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="3"/>
-      <rect x="706" y="214" width="36" height="5" rx="2.5" fill="#E8D89A"/>
-      <rect x="706" y="228" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.7"/>
-    </g>
-    <g>
-      <rect x="692" y="426" width="64" height="52" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.5" stroke-opacity="0.7"/>
-      <rect x="706" y="442" width="36" height="5" rx="2.5" fill="#F1ECDD" fill-opacity="0.8"/>
-      <rect x="706" y="456" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.6"/>
-    </g>
-
-    <!-- end -->
-    <circle cx="900" cy="341" r="34" fill="#04251B" stroke="#C9A84C" stroke-width="4"/>
-    <circle cx="900" cy="341" r="20" fill="none" stroke="#37C99A" stroke-width="3"/>
+  <!-- легенда -->
+  <g transform="translate(40,632)" font-size="13" fill="#F1ECDD" fill-opacity="0.75">
+    <line x1="0" y1="0" x2="34" y2="0" stroke="#37C99A" stroke-width="3.2"/>
+    <text x="42" y="4">основной поток</text>
+    <line x1="200" y1="0" x2="234" y2="0" stroke="#C9A84C" stroke-opacity="0.6" stroke-width="2"/>
+    <text x="242" y="4">переходы</text>
+    <line x1="360" y1="0" x2="394" y2="0" stroke="#C9A84C" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="5 5"/>
+    <text x="402" y="4">доработка</text>
   </g>
 </svg>
