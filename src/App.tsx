@@ -1441,9 +1441,12 @@ function GuessTruthQuiz() {
     return () => clearTimeout(t);
   }, [revealed, round]);
 
-  // Пока открыто всплывающее окно с ответом — блокируем прокрутку фона.
+  // Пока открыто полноэкранное окно (только мобильная версия) — блокируем
+  // прокрутку фона. На десктопе окно лежит поверх панели, страница скроллится.
   useEffect(() => {
     if (!revealed || finished) return;
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
+    if (!isMobile) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -1471,9 +1474,63 @@ function GuessTruthQuiz() {
     setFinished(false);
   };
 
+  // Тело всплывающего окна с ответом Ильи — общее для мобильной (на весь
+  // экран) и десктопной (поверх только панели «Телепатии») версий.
+  const renderAnswerBody = () => {
+    const picked = picks[round];
+    const correct = picked === current.lie;
+    const accent = correct ? C.mint : lieColor;
+    if (!showComment) {
+      return (
+        <div className="p-5">
+          <TypingDots />
+        </div>
+      );
+    }
+    return (
+      <>
+        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+          <ChatBubble side="left" accent={accent}>
+            <span className="text-[12px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>
+              {correct ? "Телепатия сработала!" : "А вот и мимо"}
+            </span>
+            <span className="mt-1.5 block whitespace-pre-line">{current.statements[picked].comment}</span>
+            {current.statements[picked].video && (
+              <div className="mt-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.line }}>
+                <video controls playsInline preload="metadata" className="block w-full bg-black" style={{ maxHeight: "48vh" }}>
+                  <source src={current.statements[picked].video} type="video/mp4" />
+                </video>
+              </div>
+            )}
+            {current.statements[picked].image && (
+              <div className="mt-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.line }}>
+                <img
+                  src={current.statements[picked].image}
+                  alt=""
+                  loading="lazy"
+                  className="block w-full"
+                  style={{ maxHeight: "48vh", objectFit: "contain", backgroundColor: C.bg }}
+                />
+              </div>
+            )}
+          </ChatBubble>
+        </div>
+        <div className="flex shrink-0 justify-end border-t p-4" style={{ borderColor: C.line, backgroundColor: C.bg2 }}>
+          <button
+            onClick={next}
+            className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-transform active:scale-[0.98]"
+            style={{ backgroundColor: C.gold, color: C.bg }}
+          >
+            {round + 1 < total ? "Дальше" : "Узнать результат"}
+          </button>
+        </div>
+      </>
+    );
+  };
+
   return (
     <>
-    <div className="mt-8 rounded-[24px] border p-5 sm:p-6" style={{ borderColor: C.line, backgroundColor: C.card }}>
+    <div className="relative mt-8 rounded-[24px] border p-5 sm:p-6" style={{ borderColor: C.line, backgroundColor: C.card }}>
       <SectionLabel>Телепатия</SectionLabel>
       <p className="mt-2 text-[13px]" style={{ color: C.inkSoft }}>
         давай познакомимся поближе — в игровой форме 🙂
@@ -1651,16 +1708,47 @@ function GuessTruthQuiz() {
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* Десктоп: окно с ответом поверх ТОЛЬКО панели «Телепатии».
+          Остальные блоки сайта остаются видимыми. */}
+      <AnimatePresence>
+        {revealed && !finished && (
+          <motion.div
+            key="quiz-answer-desktop"
+            className="absolute inset-0 z-30 hidden items-center justify-center rounded-[24px] p-4 sm:flex"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <div
+              className="absolute inset-0 rounded-[24px]"
+              style={{ backgroundColor: "rgba(2,18,13,0.72)", backdropFilter: "blur(4px)" }}
+              onClick={showComment ? next : undefined}
+            />
+            <motion.div
+              className="relative z-10 flex max-h-full w-full max-w-sm flex-col overflow-hidden rounded-3xl border shadow-2xl"
+              initial={{ y: 24, scale: 0.96, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 24, scale: 0.96, opacity: 0 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              style={{ borderColor: C.line, backgroundColor: C.bg2 }}
+            >
+              {renderAnswerBody()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
 
-    {/* Ответ Ильи во всплывающем окне — чтобы панель оставалась статичной,
-        а фото/видео и кнопка не выталкивались за пределы экрана на телефоне. */}
+    {/* Мобильный: окно на весь экран (через портал, чтобы fixed не ломался
+        transform-родителями). На десктопе скрыто — там окно внутри панели. */}
     {createPortal(
       <AnimatePresence>
         {revealed && !finished && (
           <motion.div
-            key="quiz-answer"
-            className="fixed inset-0 z-[80] flex items-end justify-center p-3 sm:items-center sm:p-6"
+            key="quiz-answer-mobile"
+            className="fixed inset-0 z-[80] flex items-end justify-center p-3 sm:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -1679,66 +1767,7 @@ function GuessTruthQuiz() {
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
               style={{ borderColor: C.line, backgroundColor: C.bg2 }}
             >
-              {(() => {
-                const picked = picks[round];
-                const correct = picked === current.lie;
-                const accent = correct ? C.mint : lieColor;
-                if (!showComment) {
-                  return (
-                    <div className="p-5">
-                      <TypingDots />
-                    </div>
-                  );
-                }
-                return (
-                  <>
-                    <div className="min-h-0 flex-1 overflow-y-auto p-5">
-                      <ChatBubble side="left" accent={accent}>
-                        <span className="text-[12px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>
-                          {correct ? "Телепатия сработала!" : "А вот и мимо"}
-                        </span>
-                        <span className="mt-1.5 block whitespace-pre-line">{current.statements[picked].comment}</span>
-                        {current.statements[picked].video && (
-                          <div className="mt-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.line }}>
-                            <video
-                              controls
-                              playsInline
-                              preload="metadata"
-                              className="block w-full bg-black"
-                              style={{ maxHeight: "48vh" }}
-                            >
-                              <source src={current.statements[picked].video} type="video/mp4" />
-                            </video>
-                          </div>
-                        )}
-                        {current.statements[picked].image && (
-                          <div className="mt-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.line }}>
-                            <img
-                              src={current.statements[picked].image}
-                              alt=""
-                              loading="lazy"
-                              className="block w-full"
-                              style={{ maxHeight: "48vh", objectFit: "contain", backgroundColor: C.bg }}
-                            />
-                          </div>
-                        )}
-                      </ChatBubble>
-                    </div>
-                    <div
-                      className="flex shrink-0 justify-end border-t p-4"
-                      style={{ borderColor: C.line, backgroundColor: C.bg2 }}
-                    >
-                      <button
-                        onClick={next}
-                        className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-transform active:scale-[0.98]"
-                        style={{ backgroundColor: C.gold, color: C.bg }}
-                      >
-                        {round + 1 < total ? "Дальше" : "Узнать результат"}
-                      </button>
-                    </div>
-                  </>
-                );
-              })()}
+              {renderAnswerBody()}
             </motion.div>
           </motion.div>
         )}
@@ -2148,7 +2177,7 @@ function Contacts() {
           <div className="flex justify-center">
             <SectionLabel>Найти меня</SectionLabel>
           </div>
-          <H2>Давайте на связи</H2>
+          <H2>Будем на связи</H2>
           <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed" style={{ color: C.inkSoft }}>
             Вот мои контакты. Буду рад пообщаться — вживую или здесь, в сети. Пишите: по делу или просто так.
           </p>
