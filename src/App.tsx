@@ -282,6 +282,7 @@ const TRACKS_AI = [
 // Обложки песен (я рисовал их под идею каждого трека). Сопоставление по названию.
 const SONG_COVERS: Record<string, string> = {
   "Спираль судьбы": "/song-covers/spiral.png",
+  "Мирный воин": "/song-covers/mirnyi-voin.jpg",
   "Инкогнито Бог": "/song-covers/incognito.png",
   Трансерфинг: "/song-covers/transerfing.jpeg",
   Окружение: "/song-covers/okruzhenie.png",
