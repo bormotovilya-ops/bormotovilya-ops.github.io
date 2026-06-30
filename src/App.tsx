@@ -59,7 +59,7 @@ const PROJECTS = [
     title: "Пространство развития",
     desc: "Мой проект про рост, технологии и смысл",
     href: "https://spacegrowth.vercel.app/",
-    cover: "/projects/space-growth.png",
+    cover: "/projects/space-growth.jpg",
   },
   {
     title: "Process Mining",
