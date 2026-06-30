@@ -1727,12 +1727,12 @@ function GuessTruthQuiz() {
               onClick={showComment ? next : undefined}
             />
             <motion.div
-              className="relative z-10 flex max-h-full w-full max-w-sm flex-col overflow-hidden rounded-3xl border shadow-2xl"
+              className="relative z-10 flex max-h-[88vh] flex-col overflow-hidden rounded-3xl border shadow-2xl"
               initial={{ y: 24, scale: 0.96, opacity: 0 }}
               animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: 24, scale: 0.96, opacity: 0 }}
               transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              style={{ borderColor: C.line, backgroundColor: C.bg2 }}
+              style={{ borderColor: C.line, backgroundColor: C.bg2, width: "calc(100% + 80px)", maxWidth: "42rem" }}
             >
               {renderAnswerBody()}
             </motion.div>
