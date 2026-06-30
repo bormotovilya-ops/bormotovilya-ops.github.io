@@ -279,6 +279,14 @@ const TRACKS_AI = [
   { title: "Kidcodes", src: "/audio/ai-5.mp3" },
 ];
 
+// Обложки песен (я рисовал их под идею каждого трека). Сопоставление по названию.
+const SONG_COVERS: Record<string, string> = {
+  "Спираль судьбы": "/song-covers/spiral.png",
+  "Инкогнито Бог": "/song-covers/incognito.png",
+  Трансерфинг: "/song-covers/transerfing.jpeg",
+  Окружение: "/song-covers/okruzhenie.png",
+};
+
 const CONTACTS = [
   { icon: Send, label: "Telegram", href: "https://t.me/IlyaBorm" },
   { icon: Radio, label: "Telegram-канал", href: "https://t.me/SoulGuideIT" },
@@ -1185,11 +1193,27 @@ function Sport() {
 
 // ---------------------------------------------------------------------------
 
-function TrackWithLyrics({ title, src, lyrics }: { title: string; src: string; lyrics?: string }) {
+function TrackWithLyrics({ title, src, lyrics, cover }: { title: string; src: string; lyrics?: string; cover?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="rounded-2xl border p-4" style={{ borderColor: C.line, backgroundColor: C.card }}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        {cover && (
+          <a
+            href={cover}
+            data-fancybox="song-cover"
+            data-caption={title}
+            className="shrink-0 self-start sm:self-center"
+          >
+            <img
+              src={cover}
+              alt={`Обложка «${title}»`}
+              loading="lazy"
+              className="h-14 w-14 rounded-xl object-cover transition-transform hover:scale-[1.04]"
+              style={{ border: `1px solid ${C.line}` }}
+            />
+          </a>
+        )}
         <p className="min-w-[150px] text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)", color: C.ink }}>
           {title}
         </p>
@@ -1229,6 +1253,16 @@ function TrackWithLyrics({ title, src, lyrics }: { title: string; src: string; l
 }
 
 function Music() {
+  // Лайтбокс для обложек песен: клик по миниатюре открывает картинку целиком.
+  useEffect(() => {
+    Fancybox.bind('[data-fancybox="song-cover"]', {
+      Carousel: { transition: "slide" },
+      Images: { zoom: true, Panzoom: { maxScale: 3 } },
+      Toolbar: { display: { left: ["infobar"], middle: ["zoomIn", "zoomOut"], right: ["close"] } },
+    });
+    return () => Fancybox.unbind('[data-fancybox="song-cover"]');
+  }, []);
+
   return (
     <section id="music" style={{ backgroundColor: C.bg }} className="relative overflow-hidden py-24 sm:py-32">
       <GhostTitle className="-right-6 top-8 text-[11vw]">music</GhostTitle>
@@ -1267,7 +1301,7 @@ function Music() {
             </p>
             <div className="mt-7 space-y-3">
               {TRACKS_LIVE.map((t) => (
-                <TrackWithLyrics key={t.title} title={t.title} src={t.src} lyrics={LYRICS[t.title]} />
+                <TrackWithLyrics key={t.title} title={t.title} src={t.src} lyrics={LYRICS[t.title]} cover={SONG_COVERS[t.title]} />
               ))}
             </div>
           </div>
@@ -1327,11 +1361,11 @@ function Music() {
         <motion.div {...fadeUp} className="mt-8 rounded-[28px] border p-6 sm:p-8" style={{ borderColor: C.line, backgroundColor: C.card }}>
           <Foldable icon={Sparkles} label="Стихи мои, остальное ИИ">
             <p className="mt-4 max-w-2xl text-[14px] leading-relaxed" style={{ color: C.inkSoft }}>
-              Тексты я писал сам, а спел их ИИ. Получилась странная и честная штука.
+              Тексты я писал сам, а спел их ИИ. По-моему, получилось неплохо, как вы считаете?
             </p>
             <div className="mt-5 space-y-3">
               {TRACKS_AI.map((t) => (
-                <TrackWithLyrics key={t.title} title={t.title} src={t.src} lyrics={LYRICS[t.title]} />
+                <TrackWithLyrics key={t.title} title={t.title} src={t.src} lyrics={LYRICS[t.title]} cover={SONG_COVERS[t.title]} />
               ))}
             </div>
           </Foldable>
