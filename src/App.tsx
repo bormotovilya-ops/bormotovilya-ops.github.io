@@ -1199,25 +1199,29 @@ function TrackWithLyrics({ title, src, lyrics, cover }: { title: string; src: st
   return (
     <div className="rounded-2xl border p-4" style={{ borderColor: C.line, backgroundColor: C.card }}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        {cover && (
-          <a
-            href={cover}
-            data-fancybox="song-cover"
-            data-caption={title}
-            className="shrink-0 self-start sm:self-center"
-          >
-            <img
-              src={cover}
-              alt={`Обложка «${title}»`}
-              loading="lazy"
-              className="h-14 w-14 rounded-xl object-cover transition-transform hover:scale-[1.04]"
-              style={{ border: `1px solid ${C.line}` }}
-            />
-          </a>
-        )}
-        <p className="min-w-[150px] text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)", color: C.ink }}>
-          {title}
-        </p>
+        {/* На телефоне обложка и название — в одну строку (экономим высоту);
+            на десктопе sm:contents «распластывает» их как прежде. */}
+        <div className="flex items-center gap-3 sm:contents">
+          {cover && (
+            <a
+              href={cover}
+              data-fancybox="song-cover"
+              data-caption={title}
+              className="shrink-0 sm:self-center"
+            >
+              <img
+                src={cover}
+                alt={`Обложка «${title}»`}
+                loading="lazy"
+                className="h-12 w-12 rounded-xl object-cover transition-transform hover:scale-[1.04] sm:h-14 sm:w-14"
+                style={{ border: `1px solid ${C.line}` }}
+              />
+            </a>
+          )}
+          <p className="min-w-[150px] text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)", color: C.ink }}>
+            {title}
+          </p>
+        </div>
         <audio controls preload="none" className="w-full sm:max-w-[340px]" style={{ colorScheme: "dark" }}>
           <source src={src} type="audio/mpeg" />
         </audio>
