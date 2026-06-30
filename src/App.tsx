@@ -53,16 +53,19 @@ const PROJECTS = [
     title: "Тренинг-новелла",
     desc: "Обучение через интерактивную историю — сюжет с вшитым тренингом",
     href: "https://spacegrowth.vercel.app/people-games-module",
+    cover: "/projects/training-novella.jpg",
   },
   {
     title: "Пространство развития",
     desc: "Мой проект про рост, технологии и смысл",
     href: "https://spacegrowth.vercel.app/",
+    cover: "/projects/space-growth.png",
   },
   {
     title: "Process Mining",
     desc: "Восстанавливаю и анализирую бизнес-процессы по цифровым следам",
     href: "https://bormotovilya-ops.github.io/beeff/process-mining/",
+    cover: "/projects/process-mining.svg",
   },
 ];
 
@@ -696,15 +699,31 @@ function ProjectCard({ p }: { p: (typeof PROJECTS)[number] }) {
       onMouseLeave={tilt.onMouseLeave}
       whileHover={{ borderColor: C.gold }}
       style={{ borderColor: C.line, backgroundColor: C.cardHi, rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformPerspective: 600 }}
-      className="flex flex-col justify-between gap-3 rounded-2xl border p-5"
+      className="group flex flex-col overflow-hidden rounded-2xl border"
     >
-      <span className="text-[15px]" style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: C.ink }}>
-        {p.title}
-      </span>
-      <span className="text-[13px] leading-snug" style={{ color: C.inkSoft }}>
-        {p.desc}
-      </span>
-      <ExternalLink className="h-5 w-5" style={{ color: C.gold }} />
+      {p.cover && (
+        <div className="relative aspect-[16/10] w-full overflow-hidden">
+          <img
+            src={p.cover}
+            alt={`Обложка проекта «${p.title}»`}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+          />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: `linear-gradient(to top, ${C.cardHi}, transparent 55%)` }}
+          />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col justify-between gap-3 p-5">
+        <span className="text-[15px]" style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: C.ink }}>
+          {p.title}
+        </span>
+        <span className="text-[13px] leading-snug" style={{ color: C.inkSoft }}>
+          {p.desc}
+        </span>
+        <ExternalLink className="h-5 w-5" style={{ color: C.gold }} />
+      </div>
     </motion.a>
   );
 }
