@@ -1323,9 +1323,9 @@ function Music() {
           </Foldable>
         </motion.div>
 
-        {/* Слова мои — голос ИИ — сворачиваемый */}
+        {/* Стихи мои, остальное ИИ — сворачиваемый */}
         <motion.div {...fadeUp} className="mt-8 rounded-[28px] border p-6 sm:p-8" style={{ borderColor: C.line, backgroundColor: C.card }}>
-          <Foldable icon={Sparkles} label="Слова мои — голос ИИ">
+          <Foldable icon={Sparkles} label="Стихи мои, остальное ИИ">
             <p className="mt-4 max-w-2xl text-[14px] leading-relaxed" style={{ color: C.inkSoft }}>
               Тексты я писал сам, а спел их ИИ. Получилась странная и честная штука.
             </p>
