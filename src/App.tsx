@@ -28,6 +28,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
@@ -1440,6 +1441,16 @@ function GuessTruthQuiz() {
     return () => clearTimeout(t);
   }, [revealed, round]);
 
+  // Пока открыто всплывающее окно с ответом — блокируем прокрутку фона.
+  useEffect(() => {
+    if (!revealed || finished) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [revealed, finished]);
+
   const pick = (idx: number) => {
     if (!revealed) setPicks((prev) => [...prev, idx]);
   };
@@ -1461,6 +1472,7 @@ function GuessTruthQuiz() {
   };
 
   return (
+    <>
     <div className="mt-8 rounded-[24px] border p-5 sm:p-6" style={{ borderColor: C.line, backgroundColor: C.card }}>
       <SectionLabel>Телепатия</SectionLabel>
       <p className="mt-2 text-[13px]" style={{ color: C.inkSoft }}>
@@ -1635,69 +1647,105 @@ function GuessTruthQuiz() {
                 })}
               </div>
 
-              {/* Комментарий Ильи к выбранному варианту — в чате */}
-              {revealed &&
-                (() => {
-                  const picked = picks[round];
-                  const correct = picked === current.lie;
-                  const accent = correct ? C.mint : lieColor;
-                  return !showComment ? (
-                    <TypingDots />
-                  ) : (
-                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+
+    {/* Ответ Ильи во всплывающем окне — чтобы панель оставалась статичной,
+        а фото/видео и кнопка не выталкивались за пределы экрана на телефоне. */}
+    {createPortal(
+      <AnimatePresence>
+        {revealed && !finished && (
+          <motion.div
+            key="quiz-answer"
+            className="fixed inset-0 z-[80] flex items-end justify-center p-3 sm:items-center sm:p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: "rgba(2,18,13,0.66)", backdropFilter: "blur(4px)" }}
+              onClick={showComment ? next : undefined}
+            />
+            <motion.div
+              className="relative z-10 flex max-h-[88vh] w-full max-w-md flex-col overflow-hidden rounded-3xl border shadow-2xl"
+              initial={{ y: 40, scale: 0.96, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 40, scale: 0.96, opacity: 0 }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              style={{ borderColor: C.line, backgroundColor: C.bg2 }}
+            >
+              {(() => {
+                const picked = picks[round];
+                const correct = picked === current.lie;
+                const accent = correct ? C.mint : lieColor;
+                if (!showComment) {
+                  return (
+                    <div className="p-5">
+                      <TypingDots />
+                    </div>
+                  );
+                }
+                return (
+                  <>
+                    <div className="min-h-0 flex-1 overflow-y-auto p-5">
                       <ChatBubble side="left" accent={accent}>
                         <span className="text-[12px] font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>
                           {correct ? "Телепатия сработала!" : "А вот и мимо"}
                         </span>
                         <span className="mt-1.5 block whitespace-pre-line">{current.statements[picked].comment}</span>
                         {current.statements[picked].video && (
-                          <div
-                            className="mt-3 overflow-hidden rounded-2xl border"
-                            style={{ borderColor: C.line }}
-                          >
+                          <div className="mt-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.line }}>
                             <video
                               controls
                               playsInline
                               preload="metadata"
                               className="block w-full bg-black"
-                              style={{ maxHeight: "60vh" }}
+                              style={{ maxHeight: "48vh" }}
                             >
                               <source src={current.statements[picked].video} type="video/mp4" />
                             </video>
                           </div>
                         )}
                         {current.statements[picked].image && (
-                          <div
-                            className="mt-3 overflow-hidden rounded-2xl border"
-                            style={{ borderColor: C.line }}
-                          >
+                          <div className="mt-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.line }}>
                             <img
                               src={current.statements[picked].image}
                               alt=""
                               loading="lazy"
                               className="block w-full"
-                              style={{ maxHeight: "60vh", objectFit: "contain", backgroundColor: C.bg }}
+                              style={{ maxHeight: "48vh", objectFit: "contain", backgroundColor: C.bg }}
                             />
                           </div>
                         )}
                       </ChatBubble>
-                      <div className="flex justify-end">
-                        <button
-                          onClick={next}
-                          className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-transform active:scale-[0.98]"
-                          style={{ backgroundColor: C.gold, color: C.bg }}
-                        >
-                          {round + 1 < total ? "Дальше" : "Узнать результат"}
-                        </button>
-                      </div>
-                    </motion.div>
-                  );
-                })()}
+                    </div>
+                    <div
+                      className="flex shrink-0 justify-end border-t p-4"
+                      style={{ borderColor: C.line, backgroundColor: C.bg2 }}
+                    >
+                      <button
+                        onClick={next}
+                        className="rounded-xl px-5 py-2.5 text-sm font-semibold transition-transform active:scale-[0.98]"
+                        style={{ backgroundColor: C.gold, color: C.bg }}
+                      >
+                        {round + 1 < total ? "Дальше" : "Узнать результат"}
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
+          </motion.div>
+        )}
+      </AnimatePresence>,
+      document.body,
+    )}
+    </>
   );
 }
 
