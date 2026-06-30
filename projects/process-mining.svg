@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 682" width="1024" height="682" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#063A2B"/>
+      <stop offset="1" stop-color="#04251B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#37C99A" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#37C99A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <marker id="arrGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#C9A84C" fill-opacity="0.7"/>
+    </marker>
+    <marker id="arrMint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#37C99A"/>
+    </marker>
+  </defs>
+
+  <rect width="1024" height="682" fill="url(#bg)"/>
+  <rect width="1024" height="682" fill="url(#glow)"/>
+
+  <!-- тонкая сетка -->
+  <g stroke="#C9A84C" stroke-opacity="0.06" stroke-width="1">
+    <path d="M0 170 H1024 M0 341 H1024 M0 512 H1024"/>
+    <path d="M256 0 V682 M512 0 V682 M768 0 V682"/>
+  </g>
+
+  <!-- цифровые следы: точки-события -->
+  <g fill="#E8D89A" fill-opacity="0.5">
+    <circle cx="90" cy="120" r="2.5"/><circle cx="180" cy="560" r="2"/>
+    <circle cx="470" cy="90" r="2"/><circle cx="610" cy="600" r="2.5"/>
+    <circle cx="930" cy="150" r="2"/><circle cx="860" cy="560" r="2.5"/>
+    <circle cx="330" cy="620" r="2"/><circle cx="700" cy="60" r="2"/>
+  </g>
+
+  <!-- второстепенные рёбра графа процесса -->
+  <g stroke="#C9A84C" stroke-opacity="0.35" stroke-width="2" marker-end="url(#arrGold)" fill="none">
+    <path d="M196 380 C 280 470, 300 470, 332 446"/>
+    <path d="M388 470 C 470 470, 480 420, 524 378"/>
+    <path d="M340 230 C 360 300, 360 360, 348 410"/>
+    <path d="M588 372 C 660 440, 690 450, 724 452"/>
+    <path d="M796 452 C 840 420, 845 390, 856 366"/>
+  </g>
+
+  <!-- обнаруженный (главный) путь — мятный, со свечением -->
+  <g filter="url(#soft)" stroke="#37C99A" stroke-opacity="0.55" stroke-width="7" fill="none">
+    <path d="M180 341 C 260 250, 280 210, 332 210"/>
+    <path d="M380 210 C 470 210, 480 280, 524 330"/>
+    <path d="M588 330 C 660 250, 690 224, 724 224"/>
+    <path d="M796 240 C 850 280, 860 300, 884 330"/>
+  </g>
+  <g stroke="#37C99A" stroke-width="3" marker-end="url(#arrMint)" fill="none">
+    <path d="M180 341 C 260 250, 280 210, 332 210"/>
+    <path d="M380 210 C 470 210, 480 280, 524 330"/>
+    <path d="M588 330 C 660 250, 690 224, 724 224"/>
+    <path d="M796 240 C 850 280, 860 300, 884 330"/>
+  </g>
+
+  <!-- узлы процесса -->
+  <g>
+    <!-- start -->
+    <circle cx="150" cy="341" r="34" fill="#04251B" stroke="#37C99A" stroke-width="3"/>
+    <circle cx="150" cy="341" r="11" fill="#37C99A"/>
+
+    <!-- задачи (прямоугольные ноды) -->
+    <g>
+      <rect x="318" y="184" width="64" height="52" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="3"/>
+      <rect x="332" y="200" width="36" height="5" rx="2.5" fill="#E8D89A"/>
+      <rect x="332" y="214" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.7"/>
+    </g>
+    <g>
+      <rect x="318" y="420" width="64" height="52" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.5" stroke-opacity="0.7"/>
+      <rect x="332" y="436" width="36" height="5" rx="2.5" fill="#F1ECDD" fill-opacity="0.8"/>
+      <rect x="332" y="450" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.6"/>
+    </g>
+
+    <!-- ветвление (gateway, ромб) -->
+    <g transform="translate(556 341)">
+      <rect x="-26" y="-26" width="52" height="52" rx="10" transform="rotate(45)" fill="#063A2B" stroke="#C9A84C" stroke-width="2.5"/>
+      <path d="M-10 0 H10 M0 -10 V10" stroke="#E8D89A" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g>
+      <rect x="692" y="198" width="64" height="52" rx="12" fill="#063A2B" stroke="#37C99A" stroke-width="3"/>
+      <rect x="706" y="214" width="36" height="5" rx="2.5" fill="#E8D89A"/>
+      <rect x="706" y="228" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.7"/>
+    </g>
+    <g>
+      <rect x="692" y="426" width="64" height="52" rx="12" fill="#063A2B" stroke="#C9A84C" stroke-width="2.5" stroke-opacity="0.7"/>
+      <rect x="706" y="442" width="36" height="5" rx="2.5" fill="#F1ECDD" fill-opacity="0.8"/>
+      <rect x="706" y="456" width="24" height="5" rx="2.5" fill="#C9A84C" fill-opacity="0.6"/>
+    </g>
+
+    <!-- end -->
+    <circle cx="900" cy="341" r="34" fill="#04251B" stroke="#C9A84C" stroke-width="4"/>
+    <circle cx="900" cy="341" r="20" fill="none" stroke="#37C99A" stroke-width="3"/>
+  </g>
+</svg>
