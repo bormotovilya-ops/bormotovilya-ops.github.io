@@ -184,6 +184,26 @@
     /* Подзаголовок внутри приложения */
     .mini-eyebrow { display:block; font-family: var(--mono); font-size: 12px; letter-spacing:.12em; text-transform:uppercase; color: var(--accent-2); margin: 30px 0 14px; }
 
+    /* Карточка скачивания файла правил */
+    .download-card {
+      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+      background: linear-gradient(180deg, var(--surface), var(--bg-2));
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 22px; text-decoration: none; color: var(--text);
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+    .download-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: var(--glow); }
+    .download-card .dl-icon { font-size: 34px; line-height: 1; flex: 0 0 auto; }
+    .download-card .dl-body { flex: 1 1 260px; min-width: 220px; }
+    .download-card .dl-title { display: block; font-size: 17px; font-weight: 700; }
+    .download-card .dl-sub { display: block; margin-top: 5px; font-size: 14px; color: var(--text-soft); }
+    .download-card .dl-btn {
+      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 22px; border-radius: 999px;
+      background: var(--grad); color: #0B0E14; font-weight: 750; font-size: 14px;
+      box-shadow: var(--glow);
+    }
+
     .toast {
       position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
       background: var(--surface-2); border: 1px solid var(--border);
@@ -279,7 +299,7 @@
           <div class="body">
             <div class="top"><span class="num">04</span><span class="time">15 мин</span><h3>Главный кейс: создаём внешний отчёт</h3></div>
             <p class="desc">От задачи до рабочего <span class="tag">.epf</span> прямо на встрече. Аудитория уже понимает, откуда Cursor знает код — кейс идёт естественно.</p>
-            <p class="hint">→ Шпаргалка под этот блок: <a href="#rules">правила формирования Word-отчётов</a> (ниже на странице).</p>
+            <p class="hint">→ Под этот блок: <a href="#rules">правила формирования Word-отчётов</a> — файл для скачивания ниже.</p>
           </div>
         </div>
 
@@ -341,97 +361,21 @@
 
     <hr class="divider">
 
-    <!-- ===== Приложение: правила формирования Word-отчётов ===== -->
+    <!-- ===== Приложение: файл с правилами формирования отчётов ===== -->
     <section class="section" id="rules">
       <div class="sec-title">
         <span class="eyebrow">Приложение к блоку 04</span>
-        <span class="count">правила реализации Word-отчётов · EPF · кадровый ЭДО</span>
+        <span class="count">правила формирования Word-отчётов · 1С</span>
       </div>
 
-      <div class="rules-intro">
-        Шпаргалка, по которой создаём внешний отчёт вживую. Полный источник —
-        <b>ТЗ 2 этап / Правила / 00-правила-реализации-Word-отчётов.md</b>. Ниже — жёсткие правила,
-        сборка макета, типичные ошибки, приёмка (с галочками) и готовый промпт для Agent mode.
-      </div>
-
-      <!-- Жёсткие правила -->
-      <span class="mini-eyebrow">Жёсткие правила</span>
-      <div class="ref-grid">
-        <div class="ref"><span class="id">ERF-W001</span><p>Word — только <code>.epf</code>, тип «Печатная форма».</p></div>
-        <div class="ref"><span class="id">ERF-W002</span><p>БСП: <code>СведенияОВнешнейОбработке</code>, вызов из <b>Печать</b>.</p></div>
-        <div class="ref"><span class="id">ERF-W012</span><p>Меню: <code>КЭДО · </code> + название.</p></div>
-        <div class="ref"><span class="id">ERF-W019</span><p>Справочник: <code>NN · </code> + название.</p></div>
-        <div class="ref"><span class="id">ERF-W006</span><p>Паттерн печати — с эталона п. 07.</p></div>
-        <div class="ref"><span class="id">ERF-W016</span><p>Подчёркивание — сниппет + <code>sync_underline.py</code>.</p></div>
-        <div class="ref"><span class="id">ERF-W017 / K-11</span><p>Списком: один DOCX, клон абзаца с меткой на строку ТЧ.</p></div>
-        <div class="ref"><span class="id">ERF-W018 / K-12</span><p>Списком: мини-документ на строку ТЧ.</p></div>
-        <div class="ref"><span class="id">ERF-W024</span><p>Версия <code>1.0.0.N</code> в BSL, README, реестрах.</p></div>
-        <div class="ref"><span class="id">ERF-010</span><p>Не вызывать <code>КадровыйЭДО.*</code>.</p></div>
-        <div class="ref"><span class="id">G-007</span><p>Запросы: псевдонимы <code>Спр…</code>.</p></div>
-        <div class="ref"><span class="id">Метки</span><p>Формат <code>[ИмяПараметра]</code>.</p></div>
-      </div>
-
-      <!-- Макет DOCX -->
-      <span class="mini-eyebrow">Макет DOCX — как собирать</span>
-      <div class="ref-grid">
-        <div class="ref">
-          <p><b>Из ТЗ</b> — таблицы, рисунки, контракты/ДС, докладные.<br>
-          <code>scripts/build_docx_from_tz.py</code>. XML-фрагмент из ТЗ, не python-docx-шапка.</p>
-        </div>
-        <div class="ref">
-          <p><b>С нуля</b> — простые распоряжения, справки.<br>
-          <code>scripts/build_docx_template.py</code>.</p>
-        </div>
-        <div class="ref">
-          <p><b>Open XML A</b> (дерево БСП) — эталон п. 07.<br>
-          <b>Open XML B</b> (ZIP+XML) — эталон п. 10.</p>
-        </div>
-        <div class="ref">
-          <p><b>Табличная шапка</b> (дата/№, уголки): менять <b>целый абзац</b> <code>w:p</code>, сохраняя <code>w:pPr</code>. Каждая <code>w:tc</code> — минимум один <code>w:p</code>.</p>
-        </div>
-      </div>
-
-      <!-- Типичные ошибки -->
-      <span class="mini-eyebrow">Типичные ошибки — на что смотреть</span>
-      <table class="errtable">
-        <thead><tr><th>Симптом</th><th>Причина</th></tr></thead>
-        <tbody>
-          <tr><td>Дата/№ «столбиком» по символу</td><td>inline-замена <code>&lt;w:drawing&gt;</code> без сохранения <code>w:p</code>/<code>w:tcPr</code></td></tr>
-          <tr><td>Шапка = только «Уважаемый…»</td><td>python-docx вместо фрагмента ТЗ</td></tr>
-          <tr><td>XML parse / mismatched tag</td><td><code>rfind('&lt;w:tbl')</code> вместо regex <code>&lt;w:tbl(?:\s|&gt;)</code></td></tr>
-          <tr><td>Нет <code>[ДатаДокладной]</code></td><td>замена по «Рисунок 13», а не по <code>rId14</code>/<code>rId15</code></td></tr>
-          <tr><td>«Неоднозначное сопоставление ячеек»</td><td><code>w:tc</code> без <code>w:p</code>; trim срезал абзац в ячейке</td></tr>
-          <tr><td>«Уважаемый Валерию…»</td><td>дательный падеж вместо <code>[ФИОАдресата]</code> в именительном</td></tr>
-        </tbody>
-      </table>
-
-      <!-- Приёмка -->
-      <span class="mini-eyebrow">Приёмка — отмечаем перед сборкой .epf</span>
-      <div class="check-list" id="acceptance">
-        <div class="check" data-id="a1"><div class="box"></div><div class="body"><p class="desc"><b>02</b>, <b>05</b> § п. NN, <b>04</b> — обновлены.</p></div></div>
-        <div class="check" data-id="a2"><div class="box"></div><div class="body"><p class="desc"><code>build_docx_*.py</code> OK; <code>verify_bsp_safe.py</code> OK.</p></div></div>
-        <div class="check" data-id="a3"><div class="box"></div><div class="body"><p class="desc">DOCX открывается в Word без ошибок.</p></div></div>
-        <div class="check" data-id="a4"><div class="box"></div><div class="body"><p class="desc">Все метки из <b>05</b> § п. NN — присутствуют в макете.</p></div></div>
-        <div class="check" data-id="a5"><div class="box"></div><div class="body"><p class="desc">Печать: подстановка работает; K-11/K-12 — один файл.</p></div></div>
-        <div class="check" data-id="a6"><div class="box"></div><div class="body"><p class="desc">W019 + W012 корректны в регистрации.</p></div></div>
-        <div class="check" data-id="a7"><div class="box"></div><div class="body"><p class="desc">Шапка с таблицей: дата/№ горизонтально, без «столбика» символов.</p></div></div>
-        <div class="check" data-id="a8"><div class="box"></div><div class="body"><p class="desc"><code>.epf</code> пересобран («Сохранить как» → «Обновить из файла»).</p></div></div>
-      </div>
-
-      <!-- Промпт -->
-      <span class="mini-eyebrow">Промпт для Agent mode</span>
-      <div class="prompt-box">
-        <div class="head">
-          <span>Шаблон · любой п. NN</span>
-          <button class="copy" id="copyPrompt" type="button">Скопировать</button>
-        </div>
-        <pre id="promptText">Реализуй п. NN «&lt;Название&gt;» в `Отчеты/NN_&lt;Имя&gt;/`.
-
-Правила: ТЗ 2 этап/Правила/00-правила-реализации-Word-отчетов.md</pre>
-      </div>
-      <p class="muted" style="font-size:13px; margin-top:12px;">
-        Агент сам находит эталон, метки и ТЗ: реестр <b>02</b>, метки <b>05</b> § п. NN, ER <b>04</b>.
-      </p>
+      <a class="download-card" href="pravila-word-otchetov.md" download="Правила-формирования-Word-отчётов.md">
+        <span class="dl-icon">📄</span>
+        <span class="dl-body">
+          <span class="dl-title">Правила реализации Word-отчётов (EPF)</span>
+          <span class="dl-sub">Жёсткие правила, сборка макета DOCX, типичные ошибки, приёмка и промпт для Agent mode — одним файлом.</span>
+        </span>
+        <span class="dl-btn">Скачать .md →</span>
+      </a>
     </section>
 
     <hr class="divider">
@@ -492,11 +436,6 @@
       localStorage.removeItem(STORAGE_KEY);
       applyState();
       showToast('Отметки сброшены');
-    });
-
-    document.getElementById('copyPrompt').addEventListener('click', () => {
-      const text = document.getElementById('promptText').textContent;
-      navigator.clipboard.writeText(text).then(() => showToast('Промпт скопирован')).catch(() => {});
     });
 
     applyState();
