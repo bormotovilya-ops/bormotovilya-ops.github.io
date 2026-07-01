@@ -288,7 +288,9 @@ const SONG_COVERS: Record<string, string> = {
   "Мирный воин": "/song-covers/mirnyi-voin.jpg",
   "Инкогнито Бог": "/song-covers/incognito.png",
   Трансерфинг: "/song-covers/transerfing.jpeg",
+  "Гений продаж": "/song-covers/geniy-prodazh.png",
   Окружение: "/song-covers/okruzhenie.png",
+  Kidcodes: "/song-covers/kidcodes.jpg",
 };
 
 const CONTACTS = [
