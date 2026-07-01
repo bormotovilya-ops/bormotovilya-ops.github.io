@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI для 1С — чек-лист показа</title>
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    /* ============================================================
+       Чек-лист показа — надстройка над общей темой
+       ============================================================ */
+
+    /* Фон берём из соседней страницы анонса — не дублируем картинку */
+    body.bg-art::before { background-image: url("../anons/assets/hero-ai-1c.png"); }
+
+    /* Прогресс-полоса (липкая шапка) */
+    .progress-bar {
+      position: sticky; top: 0; z-index: 30;
+      background: rgba(11, 14, 20, .82);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 12px clamp(18px, 4vw, 40px);
+    }
+    .progress-inner {
+      max-width: var(--maxw); margin: 0 auto;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .progress-label {
+      font-family: var(--mono); font-size: 13px; color: var(--text-soft);
+      white-space: nowrap;
+    }
+    .progress-label b { color: var(--accent-2); font-weight: 700; }
+    .progress-track {
+      flex: 1; height: 8px; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--border-soft);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; width: 0%;
+      background: var(--grad);
+      border-radius: 999px;
+      transition: width .35s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 16px rgba(124,92,255,.5);
+    }
+    .progress-reset {
+      font-family: var(--font); font-size: 12.5px;
+      color: var(--text-mute); background: transparent;
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 6px 14px; cursor: pointer; white-space: nowrap;
+      transition: color .15s ease, border-color .15s ease;
+    }
+    .progress-reset:hover { color: var(--text); border-color: var(--accent); }
+
+    /* Чек-элемент */
+    .check {
+      position: relative;
+      display: grid; grid-template-columns: auto 1fr; gap: 16px;
+      align-items: start;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+      overflow: hidden;
+    }
+    .check::before {
+      content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+      background: var(--grad); opacity: 0; transition: opacity .16s ease;
+    }
+    .check:hover { transform: translateY(-2px); border-color: var(--border); background: var(--surface-2); }
+    .check:hover::before { opacity: .5; }
+
+    /* Кастомный чекбокс */
+    .check .box {
+      width: 30px; height: 30px; border-radius: 9px;
+      border: 2px solid var(--border); background: var(--bg);
+      display: grid; place-items: center;
+      transition: all .18s ease;
+      margin-top: 2px; flex: 0 0 auto;
+    }
+    .check .box::after {
+      content: "✓"; font-size: 16px; font-weight: 800; color: #0B0E14;
+      opacity: 0; transform: scale(.4); transition: all .18s ease;
+    }
+
+    .check .body .top {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .check .num {
+      font-family: var(--mono); font-weight: 700; font-size: 14px; color: var(--accent);
+    }
+    .check .time {
+      font-family: var(--mono); font-size: 12px; color: var(--text-mute);
+      border: 1px solid var(--border); padding: 2px 9px; border-radius: 999px;
+    }
+    .check h3 { font-size: 18px; font-weight: 700; margin: 0; flex-basis: 100%; }
+    .check .desc { margin: 0; color: var(--text-soft); font-size: 14.5px; }
+    .check .desc .tag {
+      display: inline-block; font-family: var(--mono); font-size: 12px;
+      color: var(--accent-2); background: rgba(34,211,238,.08);
+      border: 1px solid var(--border); border-radius: 7px;
+      padding: 1px 7px; margin: 2px 4px 2px 0;
+    }
+    .check .hint {
+      margin-top: 10px; font-size: 13px; color: var(--text-mute);
+      border-top: 1px dashed var(--border-soft); padding-top: 10px;
+    }
+    .check .hint a { color: var(--accent-2); }
+
+    /* Состояние «пройдено» */
+    .check.done {
+      background: linear-gradient(180deg, rgba(52,211,153,.06), var(--surface));
+      border-color: rgba(52,211,153,.35);
+    }
+    .check.done::before { opacity: 1; background: var(--accent-3); }
+    .check.done .box {
+      background: var(--accent-3); border-color: var(--accent-3);
+      box-shadow: 0 0 18px rgba(52,211,153,.4);
+    }
+    .check.done .box::after { opacity: 1; transform: scale(1); }
+    .check.done h3 { color: var(--text-soft); }
+    .check.done .num { color: var(--accent-3); }
+
+    .check-list { display: grid; gap: 14px; }
+
+    /* Заголовок секции */
+    .sec-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+    .sec-title h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 750; }
+    .sec-title .count { font-family: var(--mono); font-size: 13px; color: var(--text-mute); }
+
+    /* Приложение: правила отчётов */
+    .rules-intro {
+      background: var(--grad-soft); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 22px; margin-bottom: 22px;
+      color: var(--text-soft); font-size: 14.5px;
+    }
+    .rules-intro b { color: var(--text); }
+
+    .ref-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .ref {
+      background: var(--surface); border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm); padding: 16px 18px;
+    }
+    .ref .id {
+      font-family: var(--mono); font-size: 12px; color: var(--warn);
+      background: rgba(244,183,64,.08); border: 1px solid var(--border);
+      border-radius: 6px; padding: 2px 8px; display: inline-block; margin-bottom: 8px;
+    }
+    .ref p { margin: 0; font-size: 14px; color: var(--text-soft); }
+    .ref code { font-family: var(--mono); font-size: 12.5px; color: var(--accent-2); }
+
+    .errtable {
+      width: 100%; border-collapse: collapse; font-size: 14px;
+      border: 1px solid var(--border-soft); border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .errtable th, .errtable td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+    .errtable th { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-2); background: var(--bg-2); }
+    .errtable td:first-child { color: var(--text); font-weight: 600; }
+    .errtable td:last-child { color: var(--text-soft); }
+    .errtable tr:last-child td { border-bottom: 0; }
+
+    .prompt-box {
+      background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 0; overflow: hidden;
+    }
+    .prompt-box .head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-bottom: 1px solid var(--border-soft);
+      font-family: var(--mono); font-size: 12px; color: var(--text-mute);
+    }
+    .prompt-box .copy {
+      font-family: var(--font); font-size: 12px; color: var(--accent-2);
+      background: transparent; border: 1px solid var(--border); border-radius: 7px;
+      padding: 4px 12px; cursor: pointer;
+    }
+    .prompt-box .copy:hover { border-color: var(--accent-2); }
+    .prompt-box pre {
+      margin: 0; padding: 16px; font-family: var(--mono); font-size: 13px;
+      color: var(--text); white-space: pre-wrap; line-height: 1.6;
+    }
+
+    /* Подзаголовок внутри приложения */
+    .mini-eyebrow { display:block; font-family: var(--mono); font-size: 12px; letter-spacing:.12em; text-transform:uppercase; color: var(--accent-2); margin: 30px 0 14px; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+      background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text); padding: 12px 22px; border-radius: 999px;
+      font-size: 14px; box-shadow: var(--shadow);
+      opacity: 0; pointer-events: none; transition: all .25s ease; z-index: 60;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Завершено — праздничная плашка */
+    .done-banner {
+      display: none; align-items: center; gap: 14px;
+      background: linear-gradient(135deg, rgba(52,211,153,.14), rgba(34,211,238,.10));
+      border: 1px solid rgba(52,211,153,.4); border-radius: var(--radius);
+      padding: 18px 22px; margin-top: 20px; color: var(--text);
+    }
+    .done-banner.show { display: flex; }
+    .done-banner .big { font-size: 26px; }
+
+    @media (max-width: 560px) {
+      .check { padding: 16px 16px; gap: 12px; }
+      .progress-label { font-size: 12px; }
+      .progress-reset { padding: 5px 10px; }
+    }
+  </style>
+</head>
+<body class="bg-art">
+
+  <!-- ===== Прогресс ===== -->
+  <div class="progress-bar">
+    <div class="progress-inner">
+      <span class="progress-label">Пройдено <b id="pDone">0</b> / <span id="pTotal">8</span></span>
+      <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+      <button class="progress-reset" id="resetBtn" type="button">Сбросить</button>
+    </div>
+  </div>
+
+  <main class="wrap">
+
+    <!-- ===== Заголовок ===== -->
+    <header class="hero">
+      <div class="kicker" style="margin-bottom:14px;">
+        <span class="badge"><span class="dot"></span> Чек-лист ведущего · AI + 1С · 01.07.2026</span>
+      </div>
+      <h1 class="h-hero">План показа<br><span class="grad-text">отмечаем шаги по ходу</span></h1>
+      <p class="lead" style="margin-top:14px;">
+        Восемь блоков демо ≈ 44 минуты. Прошли тему — кликнули по карточке, галочка встала,
+        полоса сверху растёт. Отметки сохраняются прямо в браузере: можно закрыть и вернуться.
+      </p>
+    </header>
+
+    <!-- ===== Сценарий ===== -->
+    <section class="section">
+      <div class="sec-title">
+        <span class="eyebrow">Сценарий встречи</span>
+        <span class="count">≈ 44 минуты · 8 блоков</span>
+      </div>
+
+      <div class="check-list" id="scenario">
+
+        <div class="check" data-id="s1">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">01</span><span class="time">2–3 мин</span><h3>Вступление</h3></div>
+            <p class="desc">Кто я · почему начал использовать AI · что покажем сегодня.</p>
+          </div>
+        </div>
+
+        <div class="check" data-id="s2">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">02</span><span class="time">5 мин</span><h3>Вау-эффект №1: эту презентацию сделал Cursor</h3></div>
+            <p class="desc">Показать сайт-презентацию и промпт, которым она собрана.</p>
+            <p class="hint">Главная мысль: Cursor создаёт не только код, но и готовые приложения.</p>
+          </div>
+        </div>
+
+        <div class="check" data-id="s3">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">03</span><span class="time">7 мин</span><h3>Как показать 1С-проект нейросети</h3></div>
+            <p class="desc">
+              Конфигуратор → «Выгрузить конфигурацию в файлы» → <span class="tag">XML</span> → Cursor. Структура каталогов.
+              Выгрузка расширений и внешних отчётов <span class="tag">.epf</span><span class="tag">.erf</span> → XML.
+              Прочие способы: <span class="tag">EDT</span><span class="tag">Git</span>. Плагин <span class="tag">1C: Platform Tools</span>.
+            </p>
+            <p class="hint">Главная мысль: сегодня используем XML — самый простой способ старта.</p>
+          </div>
+        </div>
+
+        <div class="check" data-id="s4">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">04</span><span class="time">15 мин</span><h3>Главный кейс: создаём внешний отчёт</h3></div>
+            <p class="desc">От задачи до рабочего <span class="tag">.epf</span> прямо на встрече. Аудитория уже понимает, откуда Cursor знает код — кейс идёт естественно.</p>
+            <p class="hint">→ Шпаргалка под этот блок: <a href="#rules">правила формирования Word-отчётов</a> (ниже на странице).</p>
+          </div>
+        </div>
+
+        <div class="check" data-id="s5">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">05</span><span class="time">5 мин</span><h3>Документация по отчёту</h3></div>
+            <p class="desc">Второй вау-эффект: нейросеть сама пишет документацию к тому, что сделали.</p>
+          </div>
+        </div>
+
+        <div class="check" data-id="s6">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">06</span><span class="time">5 мин</span><h3>Что нужно для старта</h3></div>
+            <p class="desc">
+              Установка Cursor (скачать · импорт настроек VS Code). Оплата: <span class="tag">Free</span><span class="tag">Pro</span>.
+              Модели: <span class="tag">Claude Sonnet</span><span class="tag">GPT</span><span class="tag">Gemini</span>.
+            </p>
+            <p class="hint">Именно здесь, а не в начале — к этому моменту люди уже захотят поставить себе Cursor.</p>
+          </div>
+        </div>
+
+        <div class="check" data-id="s7">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">07</span><span class="time">3 мин</span><h3>Rules</h3></div>
+            <p class="desc">Простой пример правил: «Используй БСП», «Пиши комментарии», «Не используй устаревшие конструкции». Показать влияние на результат.</p>
+          </div>
+        </div>
+
+        <div class="check" data-id="s8">
+          <div class="box"></div>
+          <div class="body">
+            <div class="top"><span class="num">08</span><span class="time">2 мин</span><h3>Что дальше</h3></div>
+            <p class="desc">Дорожка роста:</p>
+            <div class="path" style="margin-top:10px;">
+              <span class="step">ChatGPT</span><span class="arrow">→</span>
+              <span class="step">Cursor</span><span class="arrow">→</span>
+              <span class="step">Rules</span><span class="arrow">→</span>
+              <span class="step">Skills</span><span class="arrow">→</span>
+              <span class="step">MCP</span><span class="arrow">→</span>
+              <span class="step">Agents</span><span class="arrow">→</span>
+              <span class="step">Команды агентов</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="done-banner" id="doneBanner">
+        <span class="big">🎉</span>
+        <div>
+          <strong>Показ пройден целиком.</strong>
+          <div class="muted" style="font-size:13px; margin-top:2px;">Все восемь блоков отмечены. Удачного демо!</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ===== Приложение: правила формирования Word-отчётов ===== -->
+    <section class="section" id="rules">
+      <div class="sec-title">
+        <span class="eyebrow">Приложение к блоку 04</span>
+        <span class="count">правила реализации Word-отчётов · EPF · кадровый ЭДО</span>
+      </div>
+
+      <div class="rules-intro">
+        Шпаргалка, по которой создаём внешний отчёт вживую. Полный источник —
+        <b>ТЗ 2 этап / Правила / 00-правила-реализации-Word-отчётов.md</b>. Ниже — жёсткие правила,
+        сборка макета, типичные ошибки, приёмка (с галочками) и готовый промпт для Agent mode.
+      </div>
+
+      <!-- Жёсткие правила -->
+      <span class="mini-eyebrow">Жёсткие правила</span>
+      <div class="ref-grid">
+        <div class="ref"><span class="id">ERF-W001</span><p>Word — только <code>.epf</code>, тип «Печатная форма».</p></div>
+        <div class="ref"><span class="id">ERF-W002</span><p>БСП: <code>СведенияОВнешнейОбработке</code>, вызов из <b>Печать</b>.</p></div>
+        <div class="ref"><span class="id">ERF-W012</span><p>Меню: <code>КЭДО · </code> + название.</p></div>
+        <div class="ref"><span class="id">ERF-W019</span><p>Справочник: <code>NN · </code> + название.</p></div>
+        <div class="ref"><span class="id">ERF-W006</span><p>Паттерн печати — с эталона п. 07.</p></div>
+        <div class="ref"><span class="id">ERF-W016</span><p>Подчёркивание — сниппет + <code>sync_underline.py</code>.</p></div>
+        <div class="ref"><span class="id">ERF-W017 / K-11</span><p>Списком: один DOCX, клон абзаца с меткой на строку ТЧ.</p></div>
+        <div class="ref"><span class="id">ERF-W018 / K-12</span><p>Списком: мини-документ на строку ТЧ.</p></div>
+        <div class="ref"><span class="id">ERF-W024</span><p>Версия <code>1.0.0.N</code> в BSL, README, реестрах.</p></div>
+        <div class="ref"><span class="id">ERF-010</span><p>Не вызывать <code>КадровыйЭДО.*</code>.</p></div>
+        <div class="ref"><span class="id">G-007</span><p>Запросы: псевдонимы <code>Спр…</code>.</p></div>
+        <div class="ref"><span class="id">Метки</span><p>Формат <code>[ИмяПараметра]</code>.</p></div>
+      </div>
+
+      <!-- Макет DOCX -->
+      <span class="mini-eyebrow">Макет DOCX — как собирать</span>
+      <div class="ref-grid">
+        <div class="ref">
+          <p><b>Из ТЗ</b> — таблицы, рисунки, контракты/ДС, докладные.<br>
+          <code>scripts/build_docx_from_tz.py</code>. XML-фрагмент из ТЗ, не python-docx-шапка.</p>
+        </div>
+        <div class="ref">
+          <p><b>С нуля</b> — простые распоряжения, справки.<br>
+          <code>scripts/build_docx_template.py</code>.</p>
+        </div>
+        <div class="ref">
+          <p><b>Open XML A</b> (дерево БСП) — эталон п. 07.<br>
+          <b>Open XML B</b> (ZIP+XML) — эталон п. 10.</p>
+        </div>
+        <div class="ref">
+          <p><b>Табличная шапка</b> (дата/№, уголки): менять <b>целый абзац</b> <code>w:p</code>, сохраняя <code>w:pPr</code>. Каждая <code>w:tc</code> — минимум один <code>w:p</code>.</p>
+        </div>
+      </div>
+
+      <!-- Типичные ошибки -->
+      <span class="mini-eyebrow">Типичные ошибки — на что смотреть</span>
+      <table class="errtable">
+        <thead><tr><th>Симптом</th><th>Причина</th></tr></thead>
+        <tbody>
+          <tr><td>Дата/№ «столбиком» по символу</td><td>inline-замена <code>&lt;w:drawing&gt;</code> без сохранения <code>w:p</code>/<code>w:tcPr</code></td></tr>
+          <tr><td>Шапка = только «Уважаемый…»</td><td>python-docx вместо фрагмента ТЗ</td></tr>
+          <tr><td>XML parse / mismatched tag</td><td><code>rfind('&lt;w:tbl')</code> вместо regex <code>&lt;w:tbl(?:\s|&gt;)</code></td></tr>
+          <tr><td>Нет <code>[ДатаДокладной]</code></td><td>замена по «Рисунок 13», а не по <code>rId14</code>/<code>rId15</code></td></tr>
+          <tr><td>«Неоднозначное сопоставление ячеек»</td><td><code>w:tc</code> без <code>w:p</code>; trim срезал абзац в ячейке</td></tr>
+          <tr><td>«Уважаемый Валерию…»</td><td>дательный падеж вместо <code>[ФИОАдресата]</code> в именительном</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Приёмка -->
+      <span class="mini-eyebrow">Приёмка — отмечаем перед сборкой .epf</span>
+      <div class="check-list" id="acceptance">
+        <div class="check" data-id="a1"><div class="box"></div><div class="body"><p class="desc"><b>02</b>, <b>05</b> § п. NN, <b>04</b> — обновлены.</p></div></div>
+        <div class="check" data-id="a2"><div class="box"></div><div class="body"><p class="desc"><code>build_docx_*.py</code> OK; <code>verify_bsp_safe.py</code> OK.</p></div></div>
+        <div class="check" data-id="a3"><div class="box"></div><div class="body"><p class="desc">DOCX открывается в Word без ошибок.</p></div></div>
+        <div class="check" data-id="a4"><div class="box"></div><div class="body"><p class="desc">Все метки из <b>05</b> § п. NN — присутствуют в макете.</p></div></div>
+        <div class="check" data-id="a5"><div class="box"></div><div class="body"><p class="desc">Печать: подстановка работает; K-11/K-12 — один файл.</p></div></div>
+        <div class="check" data-id="a6"><div class="box"></div><div class="body"><p class="desc">W019 + W012 корректны в регистрации.</p></div></div>
+        <div class="check" data-id="a7"><div class="box"></div><div class="body"><p class="desc">Шапка с таблицей: дата/№ горизонтально, без «столбика» символов.</p></div></div>
+        <div class="check" data-id="a8"><div class="box"></div><div class="body"><p class="desc"><code>.epf</code> пересобран («Сохранить как» → «Обновить из файла»).</p></div></div>
+      </div>
+
+      <!-- Промпт -->
+      <span class="mini-eyebrow">Промпт для Agent mode</span>
+      <div class="prompt-box">
+        <div class="head">
+          <span>Шаблон · любой п. NN</span>
+          <button class="copy" id="copyPrompt" type="button">Скопировать</button>
+        </div>
+        <pre id="promptText">Реализуй п. NN «&lt;Название&gt;» в `Отчеты/NN_&lt;Имя&gt;/`.
+
+Правила: ТЗ 2 этап/Правила/00-правила-реализации-Word-отчетов.md</pre>
+      </div>
+      <p class="muted" style="font-size:13px; margin-top:12px;">
+        Агент сам находит эталон, метки и ТЗ: реестр <b>02</b>, метки <b>05</b> § п. NN, ER <b>04</b>.
+      </p>
+    </section>
+
+    <hr class="divider">
+    <footer>
+      План показа «AI для 1С» · чек-лист ведущего · Илья Бормотов · отметки хранятся локально в вашем браузере.
+    </footer>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'ai1c-checklist-v1';
+    const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+    const scenarioIds = ['s1','s2','s3','s4','s5','s6','s7','s8'];
+    const pFill = document.getElementById('pFill');
+    const pDone = document.getElementById('pDone');
+    const doneBanner = document.getElementById('doneBanner');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => toast.classList.remove('show'), 1600);
+    }
+
+    function updateProgress() {
+      const done = scenarioIds.filter(id => state[id]).length;
+      const pct = Math.round((done / scenarioIds.length) * 100);
+      pFill.style.width = pct + '%';
+      pDone.textContent = done;
+      doneBanner.classList.toggle('show', done === scenarioIds.length);
+    }
+
+    function applyState() {
+      document.querySelectorAll('.check').forEach(el => {
+        const id = el.dataset.id;
+        el.classList.toggle('done', !!state[id]);
+      });
+      updateProgress();
+    }
+
+    document.querySelectorAll('.check').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.dataset.id;
+        state[id] = !state[id];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        el.classList.toggle('done', state[id]);
+        updateProgress();
+        if (state[id] && scenarioIds.includes(id)) showToast('✓ Блок пройден');
+      });
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      Object.keys(state).forEach(k => delete state[k]);
+      localStorage.removeItem(STORAGE_KEY);
+      applyState();
+      showToast('Отметки сброшены');
+    });
+
+    document.getElementById('copyPrompt').addEventListener('click', () => {
+      const text = document.getElementById('promptText').textContent;
+      navigator.clipboard.writeText(text).then(() => showToast('Промпт скопирован')).catch(() => {});
+    });
+
+    applyState();
+  </script>
+
+</body>
+</html>

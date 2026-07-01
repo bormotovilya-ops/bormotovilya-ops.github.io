@@ -1,0 +1,312 @@
+/* ============================================================
+   AI для 1С — визуальная концепция (дизайн-система)
+   Стиль: тёмный «tech / AI». Подключается и анонсом, и
+   основной презентацией. Самодостаточный, без внешних шрифтов.
+   ============================================================ */
+
+:root {
+  /* --- Палитра: фон и поверхности --- */
+  --bg:            #0B0E14;   /* основной фон, почти чёрный с синевой */
+  --bg-2:          #0F1420;   /* второй слой */
+  --surface:       #131A28;   /* карточки */
+  --surface-2:     #1A2334;   /* карточки при наведении / вложенные */
+  --border:        #243044;   /* тонкие границы */
+  --border-soft:   #1B2435;
+
+  /* --- Текст --- */
+  --text:          #E7ECF5;   /* основной */
+  --text-soft:     #AAB4C5;   /* вторичный */
+  --text-mute:     #6C7894;   /* подписи, мелочь */
+
+  /* --- Акценты --- */
+  --accent:        #7C5CFF;   /* фиолетовый (AI) */
+  --accent-2:      #22D3EE;   /* циан (код / данные) */
+  --accent-3:      #34D399;   /* зелёный для «галочек» */
+  --warn:          #F4B740;   /* акцент 1С / внимание */
+
+  /* --- Градиенты --- */
+  --grad:          linear-gradient(135deg, #7C5CFF 0%, #22D3EE 100%);
+  --grad-soft:     linear-gradient(135deg, rgba(124,92,255,.18), rgba(34,211,238,.12));
+
+  /* --- Геометрия --- */
+  --radius:        16px;
+  --radius-sm:     10px;
+  --gap:           clamp(16px, 2.2vw, 28px);
+  --maxw:          1080px;
+
+  /* --- Тени / свечение --- */
+  --shadow:        0 18px 50px -20px rgba(0,0,0,.65);
+  --glow:          0 0 0 1px rgba(124,92,255,.25), 0 12px 40px -12px rgba(124,92,255,.35);
+
+  /* --- Типографика --- */
+  --font: "Segoe UI", system-ui, -apple-system, "Inter", Roboto, Arial, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Code", "SF Mono", Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(1100px 600px at 12% -8%, rgba(124,92,255,.16), transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, rgba(34,211,238,.12), transparent 55%),
+    var(--bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Раскладка ---------- */
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(18px, 4vw, 40px); }
+.section { padding: clamp(40px, 6vw, 72px) 0; }
+
+/* ---------- Утилиты текста ---------- */
+.grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent-2);
+}
+.muted { color: var(--text-mute); }
+.soft  { color: var(--text-soft); }
+
+/* ---------- Бейджи / чипы ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border-radius: 999px;
+  background: var(--grad-soft);
+  border: 1px solid var(--border);
+  font-size: 13px; color: var(--text-soft);
+}
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2);
+  box-shadow: 0 0 12px var(--accent-2); }
+
+.chip {
+  font-family: var(--mono); font-size: 12.5px;
+  padding: 4px 10px; border-radius: 8px;
+  background: rgba(34,211,238,.08);
+  border: 1px solid var(--border);
+  color: var(--accent-2);
+}
+
+/* ---------- Заголовки ---------- */
+h1, h2, h3 { line-height: 1.12; margin: 0; letter-spacing: -.01em; }
+.h-hero { font-size: clamp(34px, 6vw, 60px); font-weight: 800; }
+.h-sec  { font-size: clamp(24px, 3.4vw, 36px); font-weight: 750; }
+
+/* ---------- Hero ---------- */
+.hero { padding: clamp(56px, 9vw, 110px) 0 clamp(30px, 5vw, 56px); }
+.hero p.lead { font-size: clamp(16px, 1.7vw, 20px); color: var(--text-soft); max-width: 60ch; margin: 18px 0 0; }
+.hero .kicker { margin-bottom: 18px; }
+
+/* ---------- Сетка карточек тем ---------- */
+.cards {
+  display: grid; gap: var(--gap);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 22px 22px 20px;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+  overflow: hidden;
+}
+.card::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: var(--grad); opacity: .0; transition: opacity .18s ease;
+}
+.card:hover { transform: translateY(-4px); border-color: var(--border); background: var(--surface-2); }
+.card:hover::before { opacity: 1; }
+
+.card .num {
+  font-family: var(--mono); font-weight: 700; font-size: 14px;
+  color: var(--accent);
+}
+.card .time {
+  float: right; font-family: var(--mono); font-size: 12px;
+  color: var(--text-mute); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 999px;
+}
+.card h3 { font-size: 18px; margin: 12px 0 8px; font-weight: 700; }
+.card p  { margin: 0; color: var(--text-soft); font-size: 14.5px; }
+
+/* ---------- Инфоблок (дата / спикер / для кого) ---------- */
+.info-grid {
+  display: grid; gap: var(--gap);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.info {
+  background: linear-gradient(180deg, var(--surface), var(--bg-2));
+  border: 1px solid var(--border-soft); border-radius: var(--radius);
+  padding: 22px;
+}
+.info .label { font-family: var(--mono); font-size: 12px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-2); }
+.info .value { font-size: 17px; font-weight: 650; margin-top: 8px; }
+.info .value small { display:block; font-weight: 400; color: var(--text-mute); font-size: 13px; margin-top: 4px; }
+
+/* ---------- Список пользы (галочки) ---------- */
+.benefits { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.benefits li { display: flex; gap: 12px; align-items: flex-start; color: var(--text-soft); }
+.benefits li::before {
+  content: "✓"; flex: 0 0 auto;
+  width: 24px; height: 24px; border-radius: 7px;
+  display: grid; place-items: center;
+  background: rgba(52,211,153,.12); color: var(--accent-3);
+  font-size: 13px; font-weight: 800; margin-top: 1px;
+}
+
+/* ---------- Дорожка «что дальше» ---------- */
+.path { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-family: var(--mono); }
+.path .step { padding: 6px 12px; border-radius: 8px; background: var(--surface);
+  border: 1px solid var(--border); font-size: 13px; }
+.path .arrow { color: var(--accent); }
+
+/* ---------- CTA ---------- */
+.cta {
+  text-align: center;
+  background: var(--grad-soft);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: clamp(28px, 5vw, 48px);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 26px; border-radius: 999px;
+  background: var(--grad); color: #0B0E14; font-weight: 750;
+  text-decoration: none; border: 0; cursor: pointer;
+  box-shadow: var(--glow);
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+
+/* ---------- Подвал / разделители ---------- */
+.divider { height: 1px; background: var(--border-soft); border: 0; margin: 0; }
+footer { color: var(--text-mute); font-size: 13px; padding: 32px 0 48px; }
+
+/* ---------- Заголовок секции с надписью ---------- */
+.sec-head { margin-bottom: clamp(20px, 3vw, 32px); }
+.sec-head .eyebrow { display: block; margin-bottom: 10px; }
+
+/* ============================================================
+   Одноэкранный режим (для анонса): всё помещается без скролла
+   ============================================================ */
+.screen {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: clamp(18px, 3vh, 34px);
+  padding: clamp(20px, 4vh, 48px) 0;
+}
+.screen .hero { padding: 0; }
+.screen .section { padding: 0; }
+
+/* Компактные карточки тем — без описаний, одна строка */
+.cards.compact { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.card.mini { padding: 18px 18px 16px; }
+.card.mini h3 { font-size: 16px; margin: 10px 0 6px; }
+.card.mini p  { font-size: 13px; color: var(--text-mute); line-height: 1.45; }
+.card.mini .num { font-size: 13px; }
+
+/* Компактная строка реквизитов */
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 10px 28px; align-items: center;
+}
+.meta-row .item { display: flex; flex-direction: column; }
+.meta-row .item .label { font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-2); }
+.meta-row .item .value { font-size: 15px; font-weight: 650; }
+.meta-row .item.speaker .row { display: flex; align-items: center; gap: 10px; }
+.speaker-ava {
+  width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--border);
+  box-shadow: 0 0 0 2px rgba(124,92,255,.30);
+}
+
+@media (max-width: 860px) {
+  .cards.compact { grid-template-columns: repeat(2, 1fr); }
+  .screen { min-height: auto; }
+}
+@media (max-width: 460px) {
+  .cards.compact { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Декоративный фон-картинка (нейросеть ↔ 1С)
+   Частично: приглушён, растворяется к краям, под текстом — вуаль
+   ============================================================ */
+body.bg-art::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: url("assets/hero-ai-1c.png") center center / cover no-repeat;
+  opacity: .28;
+  /* мягко гасим края, чтобы было «частично», без жёсткой рамки */
+  -webkit-mask-image: radial-gradient(135% 100% at 50% 42%, #000 22%, transparent 76%);
+          mask-image: radial-gradient(135% 100% at 50% 42%, #000 22%, transparent 76%);
+}
+body.bg-art::after {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(11,14,20,.55) 0%, rgba(11,14,20,.74) 100%);
+}
+body.bg-art > * { position: relative; z-index: 1; }
+
+/* ============================================================
+   Модальное окно записи
+   ============================================================ */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(5, 8, 14, .72);
+  backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop.open { display: flex; }
+
+.modal {
+  width: 100%; max-width: 420px;
+  background: linear-gradient(180deg, var(--surface), var(--bg-2));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+.modal h3 { font-size: 22px; font-weight: 750; margin: 0 0 6px; }
+.modal p.sub { margin: 0 0 20px; color: var(--text-soft); font-size: 14px; }
+
+.modal .close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-soft); cursor: pointer; font-size: 16px; line-height: 1;
+}
+.modal .close:hover { background: var(--surface-2); color: var(--text); }
+
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; color: var(--text-soft); margin-bottom: 7px; }
+.field input {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--border); font-size: 15px; font-family: var(--font);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.field input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,92,255,.18);
+}
+.field input::placeholder { color: var(--text-mute); }
+
+.modal .btn { width: 100%; justify-content: center; margin-top: 4px; }
+.form-note { font-size: 12px; color: var(--text-mute); margin: 14px 0 0; text-align: center; }
+
+.form-status { margin-top: 14px; font-size: 14px; text-align: center; min-height: 20px; }
+.form-status.ok  { color: var(--accent-3); }
+.form-status.err { color: #F87171; }
